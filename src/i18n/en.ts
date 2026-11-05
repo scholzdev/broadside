@@ -13,10 +13,12 @@ import { EN_COSMETICS } from './en-cosmetics';
 import { EN_MODS3 } from './en-mods3';
 import { EN_EVO } from './en-evo';
 import { EN_SLOTS } from './en-slots';
+import { EN_TOUCH } from './en-touch';
 // English UI strings (keys are stable ids; {name} placeholders are filled by t()). Content tables keep their English text in their data files.
 export const EN: Record<string, string> = {
   // title / pause / help
   'title.sub': 'Sail. Shoot. Survive the fleet.', 'doubloons': 'Doubloons',
+  'snd.on': '🔇 Sound on (M)', 'snd.off': '🔊 Mute (M)',
   'menu.sail': 'Set Sail', 'menu.unlocks': 'Unlocks', 'menu.help': 'How to Play', 'menu.back': 'Back', 'menu.paused': 'Paused', 'menu.resume': 'Resume',
   'menu.restart': 'Restart run', 'menu.main': 'Main menu', 'menu.volume': 'Volume', 'menu.sound': 'Sound: {v}', 'on': 'On', 'off': 'Off',
   'menu.gfx': 'Graphics: {v}', 'gfx.auto': 'Auto', 'gfx.high': 'High', 'gfx.medium': 'Medium', 'gfx.low': 'Low', 'menu.lang': 'Language: {v}',
@@ -37,7 +39,7 @@ export const EN: Record<string, string> = {
   'slots.bow.one': '{n} bow slot', 'slots.bow.many': '{n} bow slots', 'slots.side.one': '{n} side slot', 'slots.side.many': '{n} side slots',
   'slots.deck.one': '{n} deck slot', 'slots.deck.many': '{n} deck slots', 'slots.stern.one': '{n} stern slot', 'slots.stern.many': '{n} stern slots',
   'slot.bow': 'bow slot', 'slot.side': 'side slot', 'slot.deck': 'deck slot', 'slot.stern': 'stern slot',
-  'lo.starts': 'Starts with {list}', 'lo.noDeck': 'The {ship} has no deck slot: no Sea Witch.', 'lo.noRegen': '{name} cannot regenerate.', 'lo.noDrawback': 'No drawback',
+  'lo.starts': 'Starts with {list}', 'lo.noRegen': '{name} cannot regenerate.', 'lo.noDrawback': 'No drawback',
   'lo.space': 'Spell (casts itself): {name}', 'lo.crewNone': 'No chosen crew: you sail with 2 Musketeers. Recruit and train more crew with cards.', 'lo.defMods': "Start with the ship's default modules: {list}.",
   'lo.replaces': 'replaces {list}', 'lo.addedFree': 'added to the free slot', 'lo.relicNone': 'Sail without a relic.', 'lo.yours': 'Your loadout',
   'lo.buy': 'Buy &middot; {n} {dbl}', 'lo.chosen': '&#10003; Chosen', 'lo.choose': 'Enter or click to choose', 'lo.back': '&lsaquo; Back',
@@ -92,7 +94,7 @@ export const EN: Record<string, string> = {
   'ctl.move': 'Accelerate / brake', 'ctl.steer': 'Steer', 'ctl.boost': 'Boost (nitro)', 'ctl.cards': 'Pick card / reroll',
   'ctl.pause': 'Pause', 'ctl.mute': 'Mute', 'ctl.zoom': 'Zoom', 'key.hold': 'Hold Shift', 'key.wheel': 'Mouse wheel',
   // popups
-  'pop.headshot': 'Headshot!', 'pop.pumped': 'Pumped!', 'pop.surgeon': 'Surgeon!', 'pop.secondWind': 'Second Wind!', 'pop.bigBlast': 'BIG BLAST!',
+  'pop.pumped': 'Pumped!', 'pop.surgeon': 'Surgeon!', 'pop.secondWind': 'Second Wind!', 'pop.bigBlast': 'BIG BLAST!',
   'pop.gold15': '+15 gold', 'pop.grog': 'Grog! +25 HP', 'pop.bribed': 'Bribed!',
 };
-Object.assign(EN, EN_CARDFMT, EN_INV, EN_LOOT, EN_QUESTS, EN_SEAS, EN_ENEMIES, EN_BOSSES, EN_CREW, EN_HEAT, EN_MUSIC, EN_TUT, EN_MODS3, EN_COSMETICS, EN_EVO, EN_SLOTS);
+Object.assign(EN, EN_CARDFMT, EN_INV, EN_LOOT, EN_QUESTS, EN_SEAS, EN_ENEMIES, EN_BOSSES, EN_CREW, EN_HEAT, EN_MUSIC, EN_TUT, EN_MODS3, EN_COSMETICS, EN_EVO, EN_SLOTS, EN_TOUCH);

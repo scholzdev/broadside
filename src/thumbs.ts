@@ -43,6 +43,7 @@ let scheduled = false;
 /** Between game frames: render queued thumbnails for ~6 ms (always at least one), then tear the pipeline down when idle. */
 function pump(): void {
   scheduled = false;
+  if (!queue.length) return; // a stale wake-up (retry timer / extra frame) can outlive the queue it was scheduled for
   if (!renderer) { scheduled = true; requestAnimationFrame(pump); return; }
   // background warming never runs while sailing (the first render compiles a shader: a visible hitch); retry later
   if (G.state === 'playing' && !urgent.has(queue[0])) { setTimeout(() => { if (!scheduled) { scheduled = true; requestAnimationFrame(pump); } }, 1500); return; }

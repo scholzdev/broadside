@@ -28,7 +28,7 @@ const find = (slot: Slot, idx: number): Owned | undefined => G.modules.find(m =>
 export function tryCast(m: Owned, force = false): boolean {
   if (G.state !== 'playing' || !hasActive(m.slot) || (!force && m.charges <= 0)) return false;
   const ms = G.modStats[m.id];
-  if (!ms || !CAST[m.id](m, ms)) return false;
+  if (!ms || !CAST[m.id]?.(m, ms)) return false;
   if (m.charges >= m.maxCharges) m.cd = activeCdMax(m);
   if (m.charges > 0) m.charges--;
   evoCast(m);

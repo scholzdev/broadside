@@ -10,7 +10,7 @@ export const DE_CONTENT: Record<string, string> = {
   'cap.tom.name': 'Humpen-Tom', 'cap.tom.up': 'Glückspilz: 20% doppelter Schaden, gratis Neuwurf bei jedem Levelaufstieg', 'cap.tom.down': 'Steuerung schwankt',
   'cap.corvo.name': 'Graf Corvo', 'cap.corvo.up': '2 HP pro Abschuss heilen, 1 pro gefressenem Objekt', 'cap.corvo.down': 'Keine Regeneration; keine Reparatur nach Bossen',
   'cap.hana.name': 'Falkenauge Hana', 'cap.hana.up': 'Autos feuern 40% schneller', 'cap.hana.down': 'Fähigkeits-Abklingzeiten +40%',
-  'cap.morwen.name': 'Morwen die Seehexe', 'cap.morwen.up': 'Fähigkeits-Abklingzeiten -35%, startet mit Seehexe', 'cap.morwen.down': '-25% Auto-Schaden',
+  'cap.morwen.name': 'Morwen die Seehexe', 'cap.morwen.up': 'Fähigkeits-Abklingzeiten -35%, startet mit Nebellaterne', 'cap.morwen.down': '-25% Auto-Schaden',
   'cap.flint.name': 'Brandfackel Flint', 'cap.flint.up': 'Alle Treffer entzünden, brennende Feinde stecken andere bei Berührung an', 'cap.flint.down': '-20% max. HP',
   'cap.gwen.name': 'Gierige Gwen', 'cap.gwen.up': '+40% Gold', 'cap.gwen.down': 'Feinde haben +15% HP',
   'cap.dorian.name': 'Duellant Dorian', 'cap.dorian.up': '+30% verursachter Schaden', 'cap.dorian.down': '+30% erlittener Schaden',

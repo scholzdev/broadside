@@ -1,8 +1,9 @@
 import { G, startRun, togglePause, restartRun, toMainMenu, retireEndless, QUICK } from './game';
+import { pad } from './input';
 import { END } from './heatdefs';
 import { L, setLoadout, loadSaved } from './loadout';
 import { initShip } from './ship';
-import { audio, setVolume } from './audio';
+import { audio, setVolume, onAudio, unmuteToggle } from './audio';
 import { deriveStats } from './content';
 import { t, onLang } from './i18n';
 import { settingsHtml, settingsAct, settingsFocus, settingsLeave, adjustVolume, setBusVolume } from './settingsui';
@@ -19,12 +20,13 @@ type Screen = 'title' | 'map' | 'loadout' | 'help' | 'pause' | 'unlocks' | 'sett
 let screen: Screen = 'title', idx = 0, settingsFrom: Screen = 'title';
 let root: HTMLElement;
 
+const sndLabel = (): string => t(audio.muted ? 'snd.on' : 'snd.off');
 const btn = (i: number, act: string, text: string, v = '', cls = ''): string => `<button class="mbtn${cls}" data-i="${i}" data-act="${act}" data-v="${v}">${text}</button>`;
 
 function html(): string {
   switch (screen) {
     case 'title':
-      return `<div class="mbox title"><h1>Broadside</h1><p class="sub">${t('title.sub')}</p><div class="dbal">${DBL} <b>${M.doubloons}</b> ${t('doubloons')}</div><div class="mbtns">${btn(0, 'sail', t('menu.sail'))}${btn(1, 'unlocks', t('menu.unlocks'))}${btn(2, 'help', t('menu.help'))}${btn(3, 'settings', t('menu.settings'))}</div></div>`;
+      return `<div class="mbox title"><h1>Broadside</h1><button class="sndbtn" data-act="snd">${sndLabel()}</button><p class="sub">${t('title.sub')}</p><div class="dbal">${DBL} <b>${M.doubloons}</b> ${t('doubloons')}</div><div class="mbtns">${btn(0, 'sail', t('menu.sail'))}${btn(1, 'unlocks', t('menu.unlocks'))}${btn(2, 'help', t('menu.help'))}${btn(3, 'settings', t('menu.settings'))}</div></div>`;
     case 'settings':
       return settingsHtml();
     case 'unlocks':
@@ -34,10 +36,10 @@ function html(): string {
     case 'help': {
       const FS = deriveStats({});
       const hp = { dur: FS.fullDur, spd: FS.fullSpd, cd: Math.round(FS.fullCd) };
-      return `<div class="mbox"><h2>${t('help.title')}</h2><ul class="help">${[1, 2, 3, 4, 5, 6, 7].map(n => `<li>${t('help.' + n, hp)}</li>`).join('')}</ul><div class="mbtns">${btn(0, 'back', t('menu.back'))}</div></div>`;
+      return `<div class="mbox"><h2>${t('help.title')}</h2><ul class="help">${[1, 2, 3, 4, 5, 6, 7].map(n => `<li${[1, 2, 3, 7].includes(n) ? ' class="nt"' : ''}>${t('help.' + n, hp)}</li>`).join('')}<li class="ht">${t('help.touch')}</li></ul><div class="mbtns">${btn(0, 'back', t('menu.back'))}</div></div>`;
     }
     case 'pause':
-      return `<div class="mbox"><h2>${t('menu.paused')}</h2><p class="ctl hk">${t('controls')}</p><p class="ctl hp">${t('controlsPad')}</p>${L.relic ? `<p class="sub">${t('menu.relic', { name: relicName(L.relic), desc: relicDesc(L.relic) })}</p>` : ''}<div class="mbtns">${btn(0, 'resume', t('menu.resume'))}${btn(1, 'settings', t('menu.settings'))}${END.on ? btn(2, 'retire', t('menu.retire')) : ''}${btn(END.on ? 3 : 2, 'restart', t('menu.restart'))}${btn(END.on ? 4 : 3, 'menu', t('menu.main'))}</div></div>`;
+      return `<div class="mbox"><h2>${t('menu.paused')}</h2><p class="ctl hk">${t('controls')}</p><p class="ctl hp">${t('controlsPad')}</p><p class="ctl ht">${t('controlsTouch')}</p>${L.relic ? `<p class="sub">${t('menu.relic', { name: relicName(L.relic), desc: relicDesc(L.relic) })}</p>` : ''}<div class="mbtns">${btn(0, 'resume', t('menu.resume'))}${btn(1, 'settings', t('menu.settings'))}${END.on ? btn(2, 'retire', t('menu.retire')) : ''}${btn(END.on ? 3 : 2, 'restart', t('menu.restart'))}${btn(END.on ? 4 : 3, 'menu', t('menu.main'))}</div></div>`;
   }
 }
 const count = (): number => root.querySelectorAll('[data-i]').length;
@@ -71,6 +73,7 @@ function act(a: string, v: string): void {
   switch (a) {
     case 'sail': go('map'); break;
     case 'help': go('help'); break;
+    case 'snd': unmuteToggle(); break;
     case 'unlocks': go('unlocks'); break;
     case 'settings': openSettings(); break;
     case 'back': back(); break;
@@ -134,6 +137,7 @@ export function initMenu(): void {
     if (t && t.tagName !== 'INPUT') { if (t.dataset.i !== undefined) setIdx(Number(t.dataset.i)); act(t.dataset.act ?? '', t.dataset.v ?? ''); }
   });
   root.addEventListener('mouseover', e => {
+    if (pad.lastInput === 'touch') return; // a tap fires compat mouseover before click: hover must not pre-focus what the tap then activates
     if (screen === 'loadout') { loadoutHover(e.target as HTMLElement); return; }
     if (screen === 'unlocks') { unlocksHover(e.target as HTMLElement); return; }
     if (screen === 'map') { mapHover(e.target as HTMLElement); return; }
@@ -141,6 +145,7 @@ export function initMenu(): void {
     if (t) setIdx(Number(t.dataset.i));
   });
   root.addEventListener('input', e => { const t = e.target as HTMLInputElement; if (t.type === 'range') setBusVolume(t.dataset.act ?? 'vol', Number(t.value) / 100); });
+  onAudio.subs.push(() => { const b = root.querySelector('.sndbtn'); if (b) b.textContent = sndLabel(); });
   onLang(() => { if (root.style.display !== 'none') render(true); });
   addEventListener('resize', () => { if (screen === 'loadout') measureStage(); });
   setLoadout(s.ship, s.captain, s);

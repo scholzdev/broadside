@@ -18,7 +18,6 @@ export const DE_MODS3: Record<string, string> = {
   'mod.spyglass.an': 'Salvenfeuer', 'mod.spyglass.at': 'Beschießt sofort die 5 am weitesten entfernten Feinde im Umkreis von 40 u mit Präzisionsschüssen.', 'mod.spyglass.ap': '8 Ziele.',
   'mod.magnet.name': 'Schatzmagnet', 'mod.magnet.info': 'Zieht Kisten und Erfahrungskugeln im Umkreis von 14 u zum Schiff und bringt alle 4 s +1 Gold, solange Beute in Reichweite ist.',
   'mod.magnet.an': 'Goldene Flut', 'mod.magnet.at': 'Kisten im Umkreis von 20 u werden zu Gold (x3 Gold) und eilen zum Schiff.', 'mod.magnet.ap': 'Radius 30.',
-  'pop.goldenTide': 'Goldene Flut!',
   'stat.Inaccuracy': 'Ungenauigkeit', 'stat.Extra bullets': 'Zusatzkugeln', 'stat.Bullets': 'Kugeln', 'stat.Fan width': 'Fächerbreite',
   'stat.Extra chain shots': 'Zusatz-Kettenschüsse', 'stat.Dismast radius': 'Entmastungsradius', 'stat.Stun time': 'Betäubungsdauer',
   'stat.Extra arrows': 'Zusatzpfeile', 'stat.Arrows': 'Pfeile', 'stat.Extra bombs': 'Zusatzbomben', 'stat.Bombs': 'Bomben', 'stat.Fire time': 'Brenndauer',

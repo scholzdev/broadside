@@ -21,7 +21,7 @@ import { L } from './loadout';
 import { bump, runCount } from './meta';
 import { SEAS, BOSS_IDS, seaBoss, pickEnemy, BossId } from './seas';
 import { maybeElite, heatDeath, heatBoss } from './heat';
-import { endHp, endDmg, endDensity, EliteTrait } from './heatdefs';
+import { endHp, endDmg, endDensity, EliteTrait, END, HEAT } from './heatdefs';
 import { fogHides } from './hazards';
 import { stepStatus, ignite, spreadBurn, speedMul, dmgTakenMul } from './status';
 import { queueBlast } from './relicfx';
@@ -209,15 +209,19 @@ function ai(e: Enemy, dt: number): void {
   pushOut(e, e.r);
 }
 
+const SPAWN_FLOOR = [1.5, 1.2, 1.0, 0.8], ALIVE_CAP = [12, 17, 22, 28];
 let spawnT = 2;
 export const resetSpawner = (): void => { spawnT = 2; };
 function stepSpawner(dt: number): void {
   spawnT -= dt * TUT.spawnMul;
   if (spawnT > 0) return;
-  const t = G.actTime;
-  spawnT = (Math.max(0.6, 3.0 - t * 0.012) * (G.boss ? 2 : 1)) / endDensity();
-  if (G.enemies.length >= 40) return;
-  const n = 1 + Math.floor(t / 45);
+  const t = G.actTime, ai = Math.min(3, Math.max(0, G.act - 1));
+  // Interval ramps down within an act but never below a per-act floor; packs (n) grow slowly and are capped per act.
+  spawnT = (Math.max(SPAWN_FLOOR[ai], 3.2 - t * 0.012) * (G.boss ? 2 : 1)) / endDensity();
+  // Alive cap rises with the act, endless step and heat; calmer while a boss is up. No spawn at the cap.
+  const cap = Math.round((ALIVE_CAP[ai] + (END.on ? 2 * END.step : 0) + 3 * HEAT.level) * (G.boss ? 0.6 : 1));
+  if (G.enemies.length >= cap) return;
+  const n = 1 + Math.min(ai >= 2 ? 2 : 1, Math.floor(t / 70));
   const a = Math.random() * Math.PI * 2;
   for (let i = 0; i < n; i++) {
     const type = pickEnemy(G.sea, G.act, t);

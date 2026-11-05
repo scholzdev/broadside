@@ -1,4 +1,5 @@
 // Captain roster data (dependency-free). Multipliers are 1 when neutral; see loadout.baseStats / content.deriveStats for how they are used.
+import type { ModuleId } from './modules';
 export type CaptainId = 'salt' | 'rosa' | 'bess' | 'tom' | 'corvo' | 'hana' | 'morwen' | 'flint' | 'gwen' | 'dorian'
   | 'thorne' | 'isabeau' | 'driftwood' | 'goldtooth' | 'cass' | 'brick' | 'ines' | 'ghost' | 'hal' | 'coral';
 
@@ -20,8 +21,8 @@ export interface CaptainDef {
   isleDmg: number; ghost: number; bowRange: number; bowSlow: boolean; sideDmg: number; summonDps: number; summonPlus: number;
   /** Thorne: kills per +1 max HP (cap 100). Driftwood: seconds cut from the Full Sail cooldown per crate / hut. Coral: heal 1 HP per module every 5 s. */
   hpKills: number; eatCd: number; modRegen: boolean;
-  /** Module granted at the start when a deck slot is free. */
-  startMod?: 'witch';
+  /** Module granted at the start (stern slot, free on every ship). */
+  startMod?: ModuleId;
 }
 export const CAP0 = { hp: 1, speed: 1, cd: 1, gold: 1, enemyHp: 1, ram: 1, contact: 1, activeCd: 1, autoDmg: 1, dmg: 1, taken: 1, autoRate: 1,
   fullSpd: 1.5, fullCd: 1, lucky: 0, freeRoll: 0, wobble: 0, healKill: 0, healEat: 0, regen: 1, repair: 0.5, ignite: false,
@@ -35,7 +36,7 @@ export const CAPTAINS: Record<CaptainId, CaptainDef> = {
   tom: c('tom', 'Tankard Tom', 'Lucky: 20% double damage, free reroll each level-up', 'Steering wobbles', { lucky: 0.2, freeRoll: 1, wobble: 0.25 }),
   corvo: c('corvo', 'Count Corvo', 'Heal 2 HP per kill, 1 per edible eaten', 'No regen; no repair after bosses', { healKill: 2, healEat: 1, regen: 0, repair: 0 }),
   hana: c('hana', 'Hawkeye Hana', 'Autos fire 40% faster', 'Active cooldowns +40%', { autoRate: 1 / 1.4, activeCd: 1.4 }),
-  morwen: c('morwen', 'Morwen the Sea Witch', 'Active cooldowns -35%, starts with Sea Witch', '-25% auto damage', { activeCd: 0.65, autoDmg: 0.75, startMod: 'witch' }),
+  morwen: c('morwen', 'Morwen the Sea Witch', 'Active cooldowns -35%, starts with Fog Lantern', '-25% auto damage', { activeCd: 0.65, autoDmg: 0.75, startMod: 'lantern' }),
   flint: c('flint', 'Firebrand Flint', 'All hits ignite, burning foes spread fire on touch', '-20% max HP', { ignite: true, hp: 0.8 }),
   gwen: c('gwen', 'Greedy Gwen', '+40% gold', 'Enemies have +15% HP', { gold: 1.4, enemyHp: 1.15 }),
   dorian: c('dorian', 'Duelist Dorian', '+30% damage dealt', '+30% damage taken', { dmg: 1.3, taken: 1.3 }),

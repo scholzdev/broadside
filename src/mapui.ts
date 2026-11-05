@@ -6,6 +6,7 @@ import { HEAT_MAX, HEAT_DBL } from './heatdefs';
 import { heatName, heatText } from './heattext';
 import { loadSaved, saveLoadout } from './loadout';
 import { t } from './i18n';
+import { pad } from './input';
 import { bossName, enemyName } from './lname';
 import { seaName, seaFlavor, hazardName, hazardText, questText, seaLock } from './seatext';
 import { SEA_EMBLEM, skullIcon } from './seaicons';
@@ -64,7 +65,7 @@ function route(): string {
 export function mapHtml(): string {
   return `<div class="smap"><div class="ltop"><button class="mbtn lback" tabindex="-1" data-act="back">${t('map.back')}</button><h2>${t('map.title')}</h2><div class="dbal">${DBL} <b>${M.doubloons}</b> ${t('doubloons')}</div></div>
     <div class="sbody"><div class="chart">${route()}${SEAS.map((_, i) => region(i)).join('')}</div><div class="card sdet" id="sdet">${detail()}</div></div>
-    <div class="hint">${t('map.hint')}</div></div>`;
+    <div class="hint"><span class="nt">${t('map.hint')}</span><span class="ht">${t('map.hintTouch')}</span></div></div>`;
 }
 function draw(): void { host.innerHTML = mapHtml(); }
 function focus(i: number): void {
@@ -111,6 +112,7 @@ export function mapClick(el: HTMLElement): 'back' | 'go' | void {
   if (a.dataset.act === 'mpick') { const i = Number(a.dataset.s); if (i === foc) return pick() ? 'go' : undefined; focus(i); }
 }
 export function mapHover(el: HTMLElement): void {
+  if (pad.lastInput === 'touch') return; // compat mouseover fires before the tap's click: first tap focuses, second sails
   const r = el.closest<HTMLElement>('.sreg');
   if (r && Number(r.dataset.s) !== foc) focus(Number(r.dataset.s));
 }

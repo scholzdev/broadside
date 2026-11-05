@@ -2,6 +2,17 @@
 
 This is a browser game built with three.js, Vite and TypeScript. The player steers a pirate galleon. Its weapons fire on their own, but each weapon can only shoot within its own fixed arc, so the player aims by steering. The ship eats boats and cargo to earn gold and XP and picks upgrades at each level-up. A boss arrives after a countdown. There is no meta progression in the MVP.
 
+## Current state (v10+)
+
+This file is the original spec and history. Where it disagrees with this section, this section wins.
+
+- **Abilities are slot-bound.** Every module sits in a mount slot (bow, stern, sides, deck). Its active belongs to that slot: **Q** fires the bow, **E** the stern, **R** the sides, and every ready module in that slot fires. Gamepad: LB / RB / Y. There is no per-module Space or AUTO mode any more.
+- **Deck modules are passive only.** They have no active.
+- **The captain spell casts itself** when it fits (aimed spells pick the biggest crowd or the boss). There is no Space key.
+- **Movement:** W / S or Up / Down throttle and brake, A / D or Left / Right steer, **Shift** is Full Sail (boost with a nitro meter). Esc / P pauses, M toggles sound (the game starts muted), the mouse wheel zooms.
+- **Touch support:** left stick steers, the sail button is Full Sail, Q / E / R buttons trigger the slot abilities, a pause button sits top-left. Menus hide keyboard hints in touch mode and use tap-friendly layouts in short landscape.
+- **Progression beyond this spec:** four seas, heat levels 0-5 per sea, endless mode, crew, relics, evolutions and synergies, cosmetics, a tutorial and procedural music.
+
 ## Stack and structure
 - Write `package.json` by hand with these pinned versions: `three@0.170.0`, `@types/three@0.170.0`, `vite@6.0.7`, `typescript@5.7.2`. Scripts: `dev` (vite), `build` (tsc --noEmit && vite build), `typecheck`.
 - `index.html` contains the canvas and an HTML overlay `#hud` for the HUD, the level-up cards and the end screens. Do not render text with three.js.
@@ -292,7 +303,7 @@ Use a clean, readable pirate palette: parchment and navy.
 
 ### Research basis (Wanderburg, Early Access 0.9.x)
 Sources: wanderburggame.wiki, whisperofthehouse, treyexgaming module table, allthings.how.
-- **Every module has an Auto component and an Active component**, each with its own damage and cooldown. For example, Front Cannon's active deals 150 dmg on a 10 s cooldown, and its auto deals 10 dmg every 1 s.
+- **Every module has an Auto component and an Active component**, each with its own damage and cooldown. For example, Front Cannon's active deals 150 dmg on a 10 s cooldown, and its auto deals 10 dmg every 1 s. *(superseded: see Current state)*
 - Modules mount on **Front / Side / Top / Back** slots. A run has about 4 actives.
 - Picking the same module again in the level-up draft **levels it up**.
 - **Captains** have a passive bonus with a real drawback, for example Racer Ruth, Tankbert, Dieter the Drunk, The Count, Huntress, Pyromaniac, Time Witch and Duelist.
@@ -313,8 +324,8 @@ Each ship has mount slots:
 - The starting module depends on the ship: Sloop starts with Bow Chaser, Galleon and Frigate with Broadside Cannons.
 
 ### Active keys
-- Actives fire automatically when their condition holds (e.g. Full Broadside with an enemy in a side arc). **Superseded by v5:** every module active auto-casts, and **Space** casts the captain's signature spell (see "Captain signature spells" in v5). Tab cycling and click-to-select are removed. While leveling up, R still rerolls.
-- A HUD **ability bar** at the bottom center shows one icon per owned module, with a SPACE (gold highlight) or AUTO label, a radial cooldown sweep, a ready glow, and a small level pip.
+- Actives fire automatically when their condition holds (e.g. Full Broadside with an enemy in a side arc). **Superseded by v5:** every module active auto-casts, and **Space** casts the captain's signature spell (see "Captain signature spells" in v5). Tab cycling and click-to-select are removed. While leveling up, R still rerolls. *(superseded: see Current state)*
+- A HUD **ability bar** at the bottom center shows one icon per owned module, with a SPACE (gold highlight) or AUTO label, a radial cooldown sweep, a ready glow, and a small level pip. *(superseded: see Current state)*
 - When an active comes off cooldown, a ready sound plays.
 
 ### Module levels
@@ -367,8 +378,8 @@ Mad Morgan is removed, since Hawkeye Hana and Duelist Dorian cover the same spac
 ## v5: Captain signature spells + meta progression
 
 ### Captain signature spells (replaces the module signature)
-- **All module actives auto-cast.** Remove the module-signature selection, Tab cycling and click-to-select.
-- **Space casts the captain's signature spell.** The ability bar shows it as a larger first icon with a "SPACE" label and the captain's portrait colour, followed by the module icons marked AUTO.
+- **All module actives auto-cast.** Remove the module-signature selection, Tab cycling and click-to-select. *(superseded: see Current state)*
+- **Space casts the captain's signature spell.** The ability bar shows it as a larger first icon with a "SPACE" label and the captain's portrait colour, followed by the module icons marked AUTO. *(superseded: see Current state)*
 - `activeCdMul` applies to the captain spell too. Hawkeye Hana and Morwen therefore affect it.
 
 | Captain | Spell | Effect | Cooldown |
@@ -405,7 +416,7 @@ Mad Morgan is removed, since Hawkeye Hana and Duelist Dorian cover the same spac
 | Captain | Tankard Tom | 200 | Reroll 15 times |
 | Captain | Count Corvo | 350 | Sink 500 ships |
 | Captain | Hawkeye Hana | 300 | Reach act 3 |
-| Captain | Morwen | 400 | Auto-cast actives 300 times |
+| Captain | Morwen | 400 | Auto-cast actives 300 times | *(superseded: see Current state)*
 | Captain | Firebrand Flint | 350 | Burn 300 enemies |
 | Captain | Duelist Dorian | 500 | Defeat the Fire Galleon (act 3 boss) |
 | Module | Iron Ram | 250 | Ram 100 enemies |
@@ -500,8 +511,8 @@ Title → **Set Sail** → one **Loadout** screen.
 - **Left edge:** a **vertical XP bar** with the level number in a round badge at the top.
 - **Bottom centre:** the ability bar.
   - First cell: **Shift**, the Full Sail icon with its cooldown.
-  - Second cell: **Space**, the captain spell.
-  - Then the module cells marked AUTO, with their ability cooldown sweep.
+  - Second cell: **Space**, the captain spell. *(superseded: see Current state)*
+  - Then the module cells marked AUTO, with their ability cooldown sweep. *(superseded: see Current state)*
 - **Top right:** gold, kills and the wind arrow, kept small. The bottom-left panel is removed and the controls hint moves into the pause/help screen.
 - The HUD must not overlap from 700 px wide up.
 
@@ -530,6 +541,8 @@ Title → **Set Sail** → one **Loadout** screen.
 
 ### Captains 11–20
 Each one has a portrait, a passive, a drawback and a spell, and goes through a meta unlock (cost and/or challenge).
+
+*(Superseded: see Current state. Captain spells no longer use Space; they cast themselves.)*
 
 | # | Captain | Passive | Drawback | Spell (Space) | CD | Unlock |
 |---|---|---|---|---|---|---|

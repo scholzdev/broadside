@@ -26,6 +26,7 @@ import { uTime } from './anim';
 import './audio';
 import './gamepad';
 import './prompts';
+import './touch';
 import { updateTutMark } from './tutorial';
 import { updateMusic, installMusicDebug } from './music';
 

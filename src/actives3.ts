@@ -4,13 +4,11 @@ import { Owned, ModuleId } from './modules';
 import { ModStats, abil } from './modstats';
 import { damageEnemy } from './enemies';
 import { slow, stun, ignite } from './status';
-import { bolt } from './bolt';
-import { edibles, orbs } from './edibles';
 import { rope } from './weapons2';
-import { bullet, arrow, lobBomb, nearest, inRange } from './weapons3';
+import { bullet, lobBomb, nearest, inRange } from './weapons3';
 import { spawnShark, stepSharks, resetSharks } from './sharks';
 import { fx, flame, splinters } from './particles';
-import { addTrauma, popText } from './juice';
+import { addTrauma } from './juice';
 import { play } from './audio';
 import { t } from './i18n';
 
@@ -58,21 +56,6 @@ function dismast(_m: Owned, ms: ModStats): boolean {
   return true;
 }
 
-function volleyFlame(_m: Owned, ms: ModStats): boolean {
-  const p = G.player, v = ms.ability, n = abil(ms, 'count');
-  if (!inRange(p.x, p.z, v.radius).length) return false;
-  for (let i = 0; i < n; i++) {
-    after((i / n) * v.span, () => {
-      const q = G.player, foes = inRange(q.x, q.z, v.radius);
-      if (!foes.length) return;
-      const e = foes[Math.floor(Math.random() * foes.length)];
-      arrow(q.x, q.z, Math.atan2(e.x - q.x, e.z - q.z) + (Math.random() - 0.5) * 0.08, 28, v.dmg * G.st.autoDmgMul, v.radius * 1.3);
-      if (i % 3 === 0) play('whoosh');
-    });
-  }
-  return true;
-}
-
 function carpet(_m: Owned, ms: ModStats): boolean {
   const p = G.player, v = ms.ability, n = abil(ms, 'count');
   if (!nearest(p.x, p.z, 40)) return false;
@@ -81,24 +64,6 @@ function carpet(_m: Owned, ms: ModStats): boolean {
       const q = G.player, fx0 = Math.sin(q.heading), fz0 = Math.cos(q.heading), lat = (Math.random() - 0.5) * 4;
       lobBomb(q.x, q.z, q.x - fx0 * (7 + (i % 3) * 2) + fz0 * lat, q.z - fz0 * (7 + (i % 3) * 2) - fx0 * lat, v.dmg, 0.8, v.radius, v.fire);
       play('boom');
-    });
-  }
-  return true;
-}
-
-function overload(_m: Owned, ms: ModStats): boolean {
-  const p = G.player, v = ms.ability, R = abil(ms, 'radius'), pulses = abil(ms, 'pulses');
-  if (!inRange(p.x, p.z, R).length) return false;
-  for (let k = 0; k < pulses; k++) {
-    after(k * 0.6, () => {
-      const q = G.player, foes = inRange(q.x, q.z, R);
-      foes.forEach((e, i) => {
-        damageEnemy(e, v.dmg, true, 'ability');
-        stun(e, v.stun);
-        if (i < 14) bolt(q.x, 3, q.z, e.x, 1.4, e.z);
-      });
-      ring(q.x, q.z, 0x6fd8ff, R * 1.05, 0.55); ring(q.x, q.z, 0xffffff, R * 0.7, 0.4);
-      addTrauma(0.3); play('zap');
     });
   }
   return true;
@@ -137,24 +102,8 @@ function volleyFire(_m: Owned, ms: ModStats): boolean {
   return true;
 }
 
-function goldenTide(_m: Owned, ms: ModStats): boolean {
-  const p = G.player, v = ms.ability, R = abil(ms, 'radius');
-  let n = 0;
-  for (const c of edibles) {
-    if (c.dead || c.kind !== 'crate' || Math.hypot(c.x - p.x, c.z - p.z) > R) continue;
-    c.gold = Math.max(c.gold, 1) * v.mult; c.pull = Math.max(c.pull, 16); n++;
-    fx(c.x, 1.0, c.z, 0xffd84a, 0.6, 2.2, 0.5, 0.9, false, undefined, 'glow');
-  }
-  for (const o of orbs) if (!o.dead && Math.hypot(o.x - p.x, o.z - p.z) < R) { o.attract = true; o.v = Math.max(o.v, 24); }
-  if (!n) return false;
-  ring(p.x, p.z, 0xffd84a, R * 1.05, 0.8);
-  popText(p.x, 4.5, p.z, t('pop.goldenTide'), 'gold');
-  play('coin');
-  return true;
-}
-
 export const CAST3: Partial<Record<ModuleId, Cast>> = {
-  swivel: hail, chain: dismast, firearrows: volleyFlame, bombketch: carpet, tesla: overload, gatling: stormOn, sharkcage: frenzy, spyglass: volleyFire, magnet: goldenTide,
+  swivel: hail, chain: dismast, bombketch: carpet, gatling: stormOn, sharkcage: frenzy, spyglass: volleyFire,
 };
 
 export function stepActives3(dt: number): void {

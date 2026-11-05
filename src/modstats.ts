@@ -29,12 +29,15 @@ const EXTRA: Record<ModuleId, { auto: Num; ability: Num }> = {
   ...EXTRA3,
 };
 
+/** Base-damage buff on every module seed (dmg / bossDmg keys): the player out-damages the waves from the first minute. */
+export const SEED_DMG_K = 1.6;
+const buffDmg = (n: Num): Num => { for (const k of ['dmg', 'bossDmg']) if (n[k]) n[k] = Math.round(n[k] * SEED_DMG_K * 10) / 10; return n; };
 export function seedStats(id: ModuleId): ModStats {
   const m = MODS[id], x = EXTRA[id];
   return {
     autoLv: 1, abilityLv: 1,
-    auto: { dmg: m.auto.dmg, cd: m.auto.cooldown, range: m.auto.range, speed: m.auto.speed, ...x.auto },
-    ability: { cd: m.active.cd, dmg: m.active.dmg ?? 0, ...x.ability },
+    auto: buffDmg({ dmg: m.auto.dmg, cd: m.auto.cooldown, range: m.auto.range, speed: m.auto.speed, ...x.auto }),
+    ability: buffDmg({ cd: m.active.cd, dmg: m.active.dmg ?? 0, ...x.ability }),
   };
 }
 /** Pristine seed per module, used as the reference for caps and floors. */
@@ -101,13 +104,24 @@ TRACKS.pump = {
 
 Object.assign(TRACKS, TRACKS3);
 
+// Balance pass: every upgrade card is a clearly visible jump. Damage steps are big (a share of the BASE seed, so linear not compounding), ability
+// track steeper than the auto track; cooldown steps are x2.25; other additive/absolute-positive steps x1.8. Specs are shared consts, so clone.
+const isDmg = (s: Spec): boolean => s.kind === 'add' && (s.key === 'dmg' || s.key === 'bossDmg');
+export const DMG_STEP = { auto: 1.0, ability: 1.0 }; // linear: + base * step * mag per damage card
+for (const def of Object.values(TRACKS)) {
+  for (const tr of ['auto', 'ability'] as Track[]) {
+    const k = DMG_STEP[tr], rescale = (s: Spec): Spec => isDmg(s) ? { ...s, step: k } : s.kind === 'cd' ? { ...s, step: s.step * 2.25 } : s.kind === 'cnt' || s.step < 0 ? s : { ...s, step: s.step * 1.8 };
+    def[tr] = { stats: def[tr].stats.map(rescale), specials: def[tr].specials };
+  }
+}
+
 const round = (v: number, dec: number): number => Math.round(v * 10 ** dec) / 10 ** dec;
 /** The stored value after one upgrade of `spec` at magnitude `mag` (caps and floors applied). Unchanged value = no room left. */
 export function nextValue(spec: Spec, base: number, cur: number, mag: number): number {
   let v: number;
   if (spec.kind === 'cd') v = Math.max(base * 0.3, cur * (1 - spec.step * mag));
   else if (spec.kind === 'cnt') v = Math.min(spec.max ?? base + 4, cur + Math.max(1, Math.round(spec.step * mag)));
-  else if (spec.kind === 'rad') v = Math.min(base * 2, cur + base * spec.step * mag);
+  else if (spec.kind === 'rad') v = Math.min(base * 2.5, cur + base * spec.step * mag);
   else if (spec.kind === 'abs') v = cur + spec.step * mag;
   else v = cur + base * spec.step * mag;
   if (spec.min !== undefined) v = Math.max(spec.min, v);

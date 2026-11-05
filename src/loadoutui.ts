@@ -68,9 +68,8 @@ function detailBody(r: number, it: Item): string {
     }
     case 1: {
       const c = CAPTAINS[it.key as CaptainId], sp = SPELLS[c.id];
-      const note = c.startMod && SHIPS[sel.ship].slots.deck === 0 ? `<div class="cnote">${t('lo.noDeck', { ship: shipName(sel.ship) })}</div>` : '';
       return `<div class="up">&#9650; ${capUp(c.id)}</div><div class="dn2">${c.down ? '&#9660; ' + capDown(c.id) : t('lo.noDrawback')}</div>
-        <div class="spl"><b>${t('lo.space', { name: spellName(c.id) })}</b> <small>${sp.cd}s</small> &middot; ${spellText(c.id)}</div>${note}${bars(sel.ship, c.id)}`;
+        <div class="spl"><b>${t('lo.space', { name: spellName(c.id) })}</b> <small>${sp.cd}s</small> &middot; ${spellText(c.id)}</div>${bars(sel.ship, c.id)}`;
     }
     case 2: return `<p>${it.key ? crewText(it.key as CrewId) + ' ' + t('lo.crewStart') : t('lo.crewNone')}</p>${it.key === 'carp' && CAPTAINS[sel.cap].regen === 0 ? `<div class="cnote">${t('lo.noRegen', { name: capName(sel.cap) })}</div>` : ''}`;
     case 3: {
@@ -103,10 +102,10 @@ export function loadoutHtml(): string {
   const rows = ROWS.map((_, r) => `<div class="lgrp"><div class="lcat">${rowName(r)}<span>${chosenItems()[r].name}</span></div><div class="lbtns">${items(r).map((it, c) => btn(r, c, it)).join('')}</div></div>`).join('');
   const b = blocker(), cost = b ? entry(b.lock)?.cost : 0;
   return `<div class="lo"><div class="lcol"><div class="ltop"><button class="mbtn lback" tabindex="-1" data-act="back">${t('lo.back')}</button><h2>${t('lo.title')}</h2>${decoTabs(deco)}<span class="lsea">${t('lo.sea', { name: seaName(sel.sea) })}</span></div><div class="lrows">${deco ? decoRows() : rows}</div>
-      <div class="hint">${t(deco ? 'deco.hint' : 'lo.hint')}</div></div>
+      <div class="hint"><span class="nt">${t(deco ? 'deco.hint' : 'lo.hint')}</span><span class="ht">${t('lo.hintTouch')}</span></div></div>
     <div class="lmid"><div class="dbal">${DBL} <b>${M.doubloons}</b> ${t('doubloons')}</div><div class="card ldet" id="ldet"></div>
-      <button class="lsail" tabindex="-1" data-act="lsail" ${b ? 'disabled' : ''}>${t('lo.sail')}</button><div class="lwhy">${b ? `${ICON.lock} ${t('lo.unlockFirst', { name: b.name, cost: cost ?? 0, dbl: DBL })}` : t('lo.enter')}</div></div>
-    <div class="lstage" id="lstage"><div class="shint">${t('lo.drag')}</div><button class="sreset" tabindex="-1" data-act="lview">${t('lo.reset')}</button></div></div>`;
+      <button class="lsail" tabindex="-1" data-act="lsail" ${b ? 'disabled' : ''}>${t('lo.sail')}</button><div class="lwhy">${b ? `${ICON.lock} ${t('lo.unlockFirst', { name: b.name, cost: cost ?? 0, dbl: DBL })}` : '<span class="nt">' + t('lo.enter') + '</span>'}</div></div>
+    <div class="lstage" id="lstage"><div class="shint nt">${t('lo.drag')}</div><button class="sreset" tabindex="-1" data-act="lview">${t('lo.reset')}</button></div></div>`;
 }
 
 function preview(): void {

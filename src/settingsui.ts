@@ -35,7 +35,7 @@ function buildHtml(): string {
     ${g('controls')}<div class="keys">${keys}</div>
     ${padHtml(g('pad'))}
     ${g('data')}${row(9, 'reset', sure ? t('set.resetSure') : done ? t('set.resetDone') : t('set.reset'))}<div class="hint">${t('set.resetNote')}</div></div>
-    <div class="mbtns">${row(10, 'back', t('menu.back'))}</div><div class="hint"><span class="hk">${t('set.hint')}</span><span class="hp">${t('set.hintPad')}</span></div></div>`;
+    <div class="mbtns">${row(10, 'back', t('menu.back'))}</div><div class="hint"><span class="hk">${t('set.hint')}</span><span class="hp">${t('set.hintPad')}</span><span class="ht">${t('set.hintTouch')}</span></div></div>`;
 }
 /** Selection moved: cancels a pending reset confirmation. Returns true when markup must be redrawn. */
 export function settingsFocus(i: number): boolean {

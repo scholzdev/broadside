@@ -6,7 +6,10 @@ let ctx: AudioContext | null = null, master: GainNode | null = null, meter: Anal
 /** volume = master; music / sfx are the two bus sliders (settings.ts persists all three). */
 export const audio = { muted: true, volume: 0.5, music: 0.5, sfx: 0.85 };
 /** settings.ts hooks in here to persist audio changes (including the M key). */
-export const onAudio: { f?: () => void } = {};
+export const onAudio: { f?: () => void; subs: (() => void)[] } = { subs: [] };
+const changed = (): void => { onAudio.f?.(); for (const s of onAudio.subs) s(); };
+/** Unlocks the audio context (needs a user gesture), then sets the mute flag. */
+export function unmuteToggle(): void { unlock(); setMuted(!audio.muted); }
 try {
   // always launch muted (user request); M or the settings toggle unmutes
   const v = parseFloat(localStorage.getItem(VKEY) ?? '');
@@ -17,12 +20,12 @@ const gain = (): number => (audio.muted ? 0 : audio.volume * TRIM);
 export function setMuted(m: boolean): void {
   audio.muted = m;
   try { localStorage.setItem(KEY, m ? '1' : '0'); } catch { /* ignore */ }
-  onAudio.f?.();
+  changed();
   if (master) master.gain.value = gain();
 }
 const level = (v: number): number => Math.min(1, Math.max(0, v));
-export function setMusicVol(v: number): void { audio.music = level(v); onAudio.f?.(); if (musicBus) musicBus.gain.value = audio.music; }
-export function setSfxVol(v: number): void { audio.sfx = level(v); onAudio.f?.(); if (sfx) sfx.gain.value = audio.sfx; }
+export function setMusicVol(v: number): void { audio.music = level(v); changed(); if (musicBus) musicBus.gain.value = audio.music; }
+export function setSfxVol(v: number): void { audio.sfx = level(v); changed(); if (sfx) sfx.gain.value = audio.sfx; }
 export interface Bus { ctx: AudioContext; music: GainNode; sfx: GainNode; noise: AudioBuffer }
 /** The running audio graph, or null before the first user gesture. */
 export function bus(): Bus | null { return ctx && musicBus && sfx && noise && ctx.state === 'running' ? { ctx, music: musicBus, sfx, noise } : null; }
@@ -36,7 +39,7 @@ export function outputLevel(): Float32Array | null {
 export function setVolume(v: number): void {
   audio.volume = Math.min(1, Math.max(0, v));
   try { localStorage.setItem(VKEY, String(audio.volume)); } catch { /* ignore */ }
-  onAudio.f?.();
+  changed();
   if (master) master.gain.value = gain();
 }
 
@@ -64,7 +67,7 @@ addEventListener('keydown', e => {
   unlock();
   if (e.code === 'KeyM' && !e.repeat) setMuted(!audio.muted);
 });
-addEventListener('pointerdown', unlock);
+for (const ev of ['pointerdown', 'click', 'touchend']) addEventListener(ev, unlock);
 
 const recent = new Map<Sound, number[]>();
 function allowed(s: Sound): boolean {

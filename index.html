@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Broadside</title>
 <style>
   :root { --parch:#f3e7c9; --parch2:#d8c595; --navy:#0d1f35; --navy2:#1a3557; --gold:#e8b23a; --brass:#b98a3e; --red:#c2412d; --green:#5aa05a; --ink:#2a1d0c; }
@@ -239,6 +239,9 @@
   #menu[data-screen=help], #menu[data-screen=pause] { justify-content:center; }
   #menu[data-screen=title] { justify-content:flex-start; padding-top:6vh; }
   #menu[data-screen=title] .mbtns { position:fixed; bottom:5vh; left:50%; transform:translateX(-50%); }
+  .sndbtn { position:fixed; top:max(12px,2vh); right:max(12px,2vw); font:inherit; font-size:16px; padding:8px 14px; color:#fff; background:rgba(10,20,30,.6); border:2px solid rgba(255,255,255,.35); border-radius:10px; cursor:pointer; text-shadow:0 1px 2px #000; z-index:5; }
+  .sndbtn:hover, .sndbtn:focus-visible { background:rgba(40,70,100,.8); border-color:var(--gold); outline:none; }
+  @media (max-height:480px) { .sndbtn { font-size:13px; padding:5px 10px; } }
   #menu[data-screen=title] { background:radial-gradient(ellipse at center, #0000 30%, #050d1899 100%); }
   /* ---- Loadout screen (v6 A) ---- */
   #menu[data-screen=loadout] { padding:0; justify-content:stretch; overflow:hidden; background:linear-gradient(90deg, #050d18d8 0%, #050d18a8 50%, #050d1800 72%); }

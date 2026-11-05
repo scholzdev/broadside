@@ -3,10 +3,9 @@ import { G, healPlayer } from './game';
 import { L } from './loadout';
 import { Owned } from './modules';
 import { ModStats, abil } from './modstats';
-import { enemyGrid, damageEnemy, Enemy } from './enemies';
+import { enemyGrid, Enemy } from './enemies';
 import { fireBall } from './weapons';
-import { launchRocket, rope } from './weapons2';
-import { nearestEnemy } from './summons';
+import { rope } from './weapons2';
 import { slow, stun } from './status';
 import { plunder } from './edibles';
 import { pushOut } from './world';
@@ -60,20 +59,6 @@ function grapeshot(_m: Owned, ms: ModStats): boolean {
   return true;
 }
 
-function salvo(_m: Owned, ms: ModStats): boolean {
-  const p = G.player, v = ms.ability, au = ms.auto, n = abil(ms, 'count');
-  if (!nearestEnemy(p.x, p.z, 35)) return false;
-  for (let i = 0; i < n; i++) {
-    after((i / n) * v.span, () => {
-      const q = G.player;
-      launchRocket(q.x, q.z, q.heading + (i / n) * Math.PI * 6 + Math.random() * 0.4, au.speed * 1.1, v.dmg, 3.5, v.turn * 1.4);
-      if (i % 3 === 0) play('whoosh');
-    });
-  }
-  addTrauma(0.2);
-  return true;
-}
-
 function dragNet(_m: Owned, ms: ModStats): boolean {
   const p = G.player, v = ms.ability, R = abil(ms, 'radius');
   const foes = inRange(p.x, p.z, R);
@@ -88,23 +73,6 @@ function dragNet(_m: Owned, ms: ModStats): boolean {
   }
   for (const e of foes) rope(p.x, p.z, e.x, e.z, 0xd0a050, 0.35);
   addTrauma(0.2); play('swirl');
-  return true;
-}
-
-function headshot(_m: Owned, ms: ModStats): boolean {
-  const p = G.player, v = ms.ability;
-  let best: Enemy | null = null;
-  for (const e of inRange(p.x, p.z, v.range)) if (!best || (e.bd ? 1e6 : 0) + e.hp > (best.bd ? 1e6 : 0) + best.hp) best = e;
-  if (!best) return false;
-  const e = best;
-  rope(p.x, p.z, e.x, e.z, 0xbfe4ff, 0.3);
-  fx(e.x, 1.6, e.z, 0xffffff, 0.8, 3.2, 0.3, 1, false, undefined, 'glow');
-  fx(e.x, 0.1, e.z, 0x6ab0e0, 0.5, 4, 0.5, 0.7, true);
-  damageEnemy(e, e.bd ? v.bossDmg : v.dmg, true, 'ability');
-  const st = abil(ms, 'stun');
-  if (st > 0) stun(e, st);
-  popText(e.x, 4.5, e.z, t('pop.headshot'), 'gold');
-  addTrauma(0.35); play('boom'); play('clang');
   return true;
 }
 
@@ -124,7 +92,7 @@ function emergencyPump(_m: Owned, ms: ModStats): boolean {
   return true;
 }
 
-export const CAST2 = { harpoon: reelIn, carronade: grapeshot, rockets: salvo, net: dragNet, crowsnest: headshot, pump: emergencyPump };
+export const CAST2 = { harpoon: reelIn, carronade: grapeshot, net: dragNet, pump: emergencyPump };
 
 export function stepActives2(dt: number): void {
   const p = G.player;

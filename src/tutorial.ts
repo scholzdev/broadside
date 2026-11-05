@@ -62,7 +62,7 @@ function build(): void {
   dlg.addEventListener('click', e => { const b = (e.target as HTMLElement).closest('button'); if (b) { if (b.id === 'tutyes') finish(true); else closeConfirm(); } });
   panel.addEventListener('click', e => { const id = (e.target as HTMLElement).closest('button')?.id; if (id === 'tutend') finish(false); else if (id === 'tutskip') openConfirm(); });
 }
-const hints = (): Record<string, string> => ({ k: kb(['A / D', 'Shift', '', '', 'Q', '1 / 2 / 3', ''][TUT.step], ['LS', 'RT', '', '', 'LB', 'A', ''][TUT.step]), a: kb('E', 'RB'), r: kb('R', 'Y') });
+const hints = (): Record<string, string> => ({ k: kb(['A / D', 'Shift', '', '', 'Q', '1 / 2 / 3', ''][TUT.step], ['LS', 'RT', '', '', 'LB', 'A', ''][TUT.step], ['touch.stick', 'touch.sail', '', '', 'Q', 'touch.tapCard', ''].map(k => (k.includes('.') ? t(k) : k))[TUT.step]), a: kb('E', 'RB', 'E'), r: kb('R', 'Y', 'R') });
 function render(): void {
   if (!TUT.active) { panel.style.display = 'none'; dlg.style.display = 'none'; mark.style.display = 'none'; return; }
   const n = STEPS.length, s = STEPS[Math.min(TUT.step, n - 1)];

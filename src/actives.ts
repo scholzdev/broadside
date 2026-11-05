@@ -3,10 +3,9 @@ import { L } from './loadout';
 import { Owned, ModuleId } from './modules';
 import { ModStats, isPlus, abil } from './modstats';
 import { enemyGrid, damageEnemy, Enemy } from './enemies';
-import { fireVolley, fireBall, lobShell, deleteEnemyProjectiles, explode } from './weapons';
+import { fireVolley, fireBall, deleteEnemyProjectiles, explode } from './weapons';
 import { spawnLongboat, nearestEnemy } from './summons';
-import { ignite, stun } from './status';
-import { strike } from './bolt';
+import { ignite } from './status';
 import { islands, pushOut } from './world';
 import { fx, flame, embers, muzzle } from './particles';
 import { addTrauma } from './juice';
@@ -64,26 +63,6 @@ function heatedShot(_m: Owned, ms: ModStats): boolean {
   return true;
 }
 
-function barrage(_m: Owned, ms: ModStats): boolean {
-  const p = G.player, v = ms.ability;
-  const near = inRange(p.x, p.z, v.gate);
-  if (!near.length) return false;
-  let best = near[0], bn = -1;
-  for (const e of near) {
-    const n = near.reduce((c, o) => c + (Math.hypot(o.x - e.x, o.z - e.z) < v.cluster ? 1 : 0), 0);
-    if (n > bn) { bn = n; best = e; }
-  }
-  const cx = best.x, cz = best.z, n = abil(ms, 'count');
-  for (let i = 0; i < n; i++) {
-    after((i / n) * v.spread, () => {
-      const q = G.player, a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * v.scatter;
-      lobShell(q.x, q.z, cx + Math.cos(a) * d, cz + Math.sin(a) * d, v.dmg, v.flight, v.radius);
-      play('boom');
-    });
-  }
-  return true;
-}
-
 function powderTrail(_m: Owned, ms: ModStats): boolean {
   S.trailT = abil(ms, 'duration'); S.trailR = abil(ms, 'radius'); S.trailLife = ms.ability.segLife;
   play('fire');
@@ -105,24 +84,6 @@ function boardersAway(_m: Owned, ms: ModStats): boolean {
     spawnLongboat(p.x + Math.sin(a) * 2.5, p.z + Math.cos(a) * 2.5, a, v.dmg, abil(ms, 'life'), v.speed);
   }
   play('whoosh');
-  return true;
-}
-
-function stormCall(_m: Owned, ms: ModStats): boolean {
-  const p = G.player, v = ms.ability, plus = isPlus(ms);
-  if (!inRange(p.x, p.z, v.radius).length) return false;
-  const n = abil(ms, 'count');
-  for (let i = 0; i < n; i++) {
-    after(i * v.gap, () => {
-      const c = inRange(G.player.x, G.player.z, v.radius);
-      if (!c.length) return;
-      const e = c[Math.floor(Math.random() * c.length)];
-      strike(e.x, e.z);
-      damageEnemy(e, v.dmg, true, 'ability');
-      if (plus) stun(e, v.stun);
-      addTrauma(0.1); play('zap');
-    });
-  }
   return true;
 }
 
@@ -171,10 +132,10 @@ function vanish(_m: Owned, ms: ModStats): boolean {
   return true;
 }
 
-export const CAST: Record<ModuleId, Cast> = {
-  broadside: fullBroadside, chaser: heatedShot, mortar: barrage, kegs: powderTrail, ram: rammingSpeed,
-  boarding: boardersAway, witch: stormCall, siphon: flameWall, ward, lantern: vanish, ...CAST2, ...CAST3,
-} as Record<ModuleId, Cast>;
+export const CAST: Partial<Record<ModuleId, Cast>> = {
+  broadside: fullBroadside, chaser: heatedShot, kegs: powderTrail, ram: rammingSpeed,
+  boarding: boardersAway, siphon: flameWall, ward, lantern: vanish, ...CAST2, ...CAST3,
+};
 
 /** Fixed-step upkeep of queued volleys/strikes, the powder trail, the flame wall and the ram dash / ward timers. */
 export function stepActives(dt: number): void {

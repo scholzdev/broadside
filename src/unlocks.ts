@@ -90,7 +90,7 @@ export function unlocksHtml(): string {
     + `<div class="lgrp"><div class="lcat">${t('un.logbook')}<span>${t('un.lifetimeS')}</span></div><div class="lbtns"><div class="ubtn ulogb" data-act="upick" data-r="${LOG}" data-c="0">${t('un.openLog')}</div></div></div>`;
   return `<div class="lo unl"><div class="lcol"><div class="ltop"><button class="mbtn lback" tabindex="-1" data-act="back">${t('lo.back')}</button><h2>${t('un.title')}</h2><span class="ucnt">${t('un.cnt', { n, t: tot })}</span>
       <div class="dbal">${DBL} <b>${M.doubloons}</b>${UNLOCK_ALL ? ' (?unlockall)' : ''}</div></div><div class="lrows">${rows}</div>
-      <div class="hint">${t('un.hint')}</div></div>
+      <div class="hint"><span class="nt">${t('un.hint')}</span><span class="ht">${t('un.hintTouch')}</span></div></div>
     <div class="lmid"><div class="card ldet" id="ldet"></div></div></div>`;
 }
 
