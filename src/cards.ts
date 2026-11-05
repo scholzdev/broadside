@@ -2,7 +2,7 @@ import { deriveStats, Levels, MAX_LV, Stats } from './content';
 import { shipView } from './cardfmt';
 import { modInPool } from './meta';
 import { L } from './loadout';
-import { MODS, MOD_IDS, ModuleId, Slot, MAX_MOD_LV, PLUS_LV } from './modules';
+import { MODS, MOD_IDS, ModuleId, Slot, MAX_MOD_LV, PLUS_LV, SLOT_KEY } from './modules';
 import { t } from './i18n';
 import { modName, modInfo, modActive, slotName, statLabel } from './lname';
 import type { CrewId } from './relics';
@@ -66,7 +66,7 @@ function trackCard(id: ModuleId, track: Track, ms: ModStats, rareUp: boolean): C
     id: `${track}:${id}`, kind: track, ref: id, mod: id, title: modName(id), rarity, trackLevel: next, lines, special: sp ? `${statLabel(sp.label)} +1` : undefined,
     unlock: track === 'ability' && next === PLUS_LV ? `${modActive(id).name}+ — ${modActive(id).plus}` : undefined,
     changes: lines.map(l => ({ key: l.key, to: l.to })),
-    text: t('card.trackText', { name: track === 'auto' ? t('card.autoAttack') : modActive(id).name, n: next, lines: lines.map(fmt).join('; ') }),
+    text: t('card.trackText', { name: track === 'auto' ? t('card.autoAttack') : `${modActive(id).name} (${SLOT_KEY[m.slot]?.key})`, n: next, lines: lines.map(fmt).join('; ') }),
   };
 }
 
@@ -93,10 +93,10 @@ function candidates(ctx: Ctx): Cand[] {
   for (const id of MOD_IDS) {
     const m = MODS[id], ms = ctx.ms[id];
     if (ms) {
-      for (const track of ['auto', 'ability'] as Track[]) out.push({ w: 1, make: () => trackCard(id, track, ms, !!ctx.rareUp) });
+      for (const track of (SLOT_KEY[m.slot] ? ['auto', 'ability'] : ['auto']) as Track[]) out.push({ w: 1, make: () => trackCard(id, track, ms, !!ctx.rareUp) }); // deck modules: no active, no ability track
     } else if (ctx.free[m.slot] > 0 && modInPool(id)) {
       out.push({ w: 0.8 / nNew, nm: true, make: () => ({ id: 'mod:' + id, kind: 'newmod', ref: id, mod: id, title: t('card.newModule', { name: modName(id) }), lines: [],
-        text: t('card.mount', { info: modInfo(id), slot: slotName(m.slot), an: modActive(id).name, cd: m.active.cd, at: modActive(id).text }) }) });
+        text: SLOT_KEY[m.slot] ? t('card.mount', { info: modInfo(id), slot: slotName(m.slot), k: SLOT_KEY[m.slot]!.key, an: modActive(id).name, cd: m.active.cd, at: modActive(id).text }) : t('card.mountDeck', { info: modInfo(id), slot: slotName(m.slot) }) }) });
     }
   }
   return out;

@@ -6,7 +6,7 @@ import { MODS, ModuleId } from './modules';
 import { RELIC_IDS, RelicId, CREW, CREW_IDS, CrewId } from './relics';
 import { SPELLS } from './spelldata';
 import { t } from './i18n';
-import { shipName, shipBlurb, capName, capUp, capDown, spellName, spellText, modName, modInfo, modActive, relicName, relicDesc, crewName, crewText, slotName, slotCount } from './lname';
+import { shipName, shipBlurb, capName, capUp, capDown, spellName, spellText, modName, modInfo, modActiveLine, relicName, relicDesc, crewName, crewText, slotName, slotCount } from './lname';
 import { portrait } from './portraits';
 import { M, entry, isUnlocked, buyUnlock } from './meta';
 import { lockInfo, DBL } from './unlocks';
@@ -78,7 +78,7 @@ function detailBody(r: number, it: Item): string {
       if (!it.key) return `<p>${t('lo.defMods', { list: modNames(def) })}</p>`;
       const m = MODS[it.key as ModuleId], got = startModules(sel.ship, sel.cap, m.id), gone = def.filter(x => !got.includes(x));
       return `<p>${modInfo(m.id)}</p><div class="lsub">${slotName(m.slot)} &middot; ${gone.length ? t('lo.replaces', { list: modNames(gone) }) : t('lo.addedFree')}</div>
-        <div class="spl"><b>${modActive(m.id).name}</b> <small>${t('auto')} &middot; ${m.active.cd}s</small> &middot; ${modActive(m.id).text}</div>`;
+        ${modActiveLine(m.id)}`;
     }
     default: return `<p>${it.key ? relicDesc(it.key as RelicId) : t('lo.relicNone')}</p>`;
   }

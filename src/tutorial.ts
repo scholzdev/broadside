@@ -3,7 +3,6 @@ import { G, startRun, gainXp, xpNeed, toMainMenu } from './game';
 import { NO_EXTRAS } from './loadout';
 import { spawnEnemy } from './enemies';
 import { addEdible, edibles } from './edibles';
-import { spellCd } from './spells';
 import { M } from './meta';
 import { S, saveSettings } from './settings';
 import { t, onLang } from './i18n';
@@ -15,7 +14,7 @@ import './tutorialcss';
 // ---- first-run guided tutorial: 7 steps in Calm Seas act 1 (slowed spawner, invulnerable hull). Esc / B asks "Skip tutorial?" ----
 interface Pt { x: number; z: number }
 const wrap = (a: number): number => Math.atan2(Math.sin(a), Math.cos(a));
-let acc = 0, prevH = 0, base = 0, armed = false, lvSeen = false, prevState = 'playing';
+let acc = 0, prevH = 0, base = 0, lvSeen = false, prevState = 'playing';
 const nearest = (list: Pt[]): Pt | null => {
   let best: Pt | null = null, bd = 1e9;
   for (const e of list) { const d = Math.hypot(e.x - G.player.x, e.z - G.player.z); if (d < bd) { bd = d; best = e; } }
@@ -39,8 +38,8 @@ const SH: Step[] = [
   { init() { base = M.stats.boatsEaten; for (const [d, s] of [[14, -2], [20, 2], [26, 0]]) { const q = ahead(d, s); addEdible('boat', q.x, q.z); } },
     tick() { if (M.stats.boatsEaten - base < 3 && edibles.filter(e => !e.dead && e.kind === 'boat').length === 0) { const q = ahead(16); addEdible('boat', q.x, q.z); } return (M.stats.boatsEaten - base) / 3; },
     target: () => nearest(edibles.filter(e => !e.dead && e.kind === 'boat')) },
-  { init() { armed = false; for (const s of [-4, 4]) { const q = ahead(18, s); spawnEnemy('raft', q.x, q.z); } },
-    tick() { const c = spellCd().cd; if (c <= 0) armed = true; return armed && c > 0 ? 1 : 0; },
+  { init() { base = M.stats.autoCasts; for (const s of [-12, 12]) { const q = ahead(2, s); spawnEnemy('raft', q.x, q.z); } }, // abeam: the broadside (R) has targets
+    tick() { return M.stats.autoCasts > base ? 1 : 0; },
     target: () => nearest(live('raft')) },
   { init() { lvSeen = false; TUT.noLevel = false; G.gold = Math.max(G.gold, 40); G.xp = xpNeed(G.level); gainXp(0); lvSeen = G.state === 'levelup'; },
     tick() { if (G.state === 'levelup') lvSeen = true; return lvSeen && G.state === 'playing' ? 1 : 0; } },
@@ -63,7 +62,7 @@ function build(): void {
   dlg.addEventListener('click', e => { const b = (e.target as HTMLElement).closest('button'); if (b) { if (b.id === 'tutyes') finish(true); else closeConfirm(); } });
   panel.addEventListener('click', e => { const id = (e.target as HTMLElement).closest('button')?.id; if (id === 'tutend') finish(false); else if (id === 'tutskip') openConfirm(); });
 }
-const hints = (): Record<string, string> => ({ k: kb(['A / D', 'Shift', '', '', 'Space / click', '1 / 2 / 3', ''][TUT.step], ['LS', 'RT', '', '', 'RB', 'A', ''][TUT.step]), a: kb('mouse', 'RS'), r: kb('R', 'Y') });
+const hints = (): Record<string, string> => ({ k: kb(['A / D', 'Shift', '', '', 'Q', '1 / 2 / 3', ''][TUT.step], ['LS', 'RT', '', '', 'LB', 'A', ''][TUT.step]), a: kb('E', 'RB'), r: kb('R', 'Y') });
 function render(): void {
   if (!TUT.active) { panel.style.display = 'none'; dlg.style.display = 'none'; mark.style.display = 'none'; return; }
   const n = STEPS.length, s = STEPS[Math.min(TUT.step, n - 1)];

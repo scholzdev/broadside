@@ -1,6 +1,6 @@
 import { tr, t } from './i18n';
 import { SHIPS, CAPTAINS, ShipId, CaptainId } from './loadout';
-import { MODS, ModuleId, Slot } from './modules';
+import { MODS, ModuleId, Slot, SLOT_KEY } from './modules';
 import { RELICS, CREW, RelicId, CrewId } from './relics';
 import { SPELLS } from './spelldata';
 import { BOSSES, ENEMIES, EnemyType } from './content';
@@ -44,3 +44,12 @@ export function unlockName(id: string): string {
   const [k, v] = id.split(':');
   return k === 'ship' ? shipName(v as ShipId) : k === 'cap' ? capName(v as CaptainId) : k === 'relic' ? relicName(v as RelicId) : k === 'crew' ? crewName(v as CrewId) : modName(v as ModuleId);
 }
+
+/** Key badge (keyboard key, gamepad glyph via prompts' data-p) that fires a slot's actives; '' for the deck. */
+export const slotKeyBadge = (slot: Slot): string => { const k = SLOT_KEY[slot]; return k ? `<span class="kb" data-p="${k.pad}">${k.key}</span>` : ''; };
+/** Module preview line: its active with the slot key and cooldown, or the deck note (auto weapon only). */
+export const modActiveLine = (id: ModuleId): string => {
+  const m = MODS[id];
+  if (!SLOT_KEY[m.slot]) return `<div class="spl">${t('mod.noActive')}</div>`;
+  return `<div class="spl">${slotKeyBadge(m.slot)} <b>${modActive(id).name}</b> <small>${m.active.cd}s</small> &middot; ${modActive(id).text}</div>`;
+};

@@ -43,7 +43,7 @@ function refreshBar(): void {
     key = 'menu' + menu;
     html = item('D-pad', 'pad.nav') + item('A', 'pad.select') + item('B', 'pad.back') + (menu === 'loadout' || menu === 'unlocks' ? item('LB/RB', 'pad.tabs') : '');
   } else if (s === 'playing' && performance.now() < seaUntil) {
-    key = 'sea'; html = item('LS', 'pad.sail') + item('RT', 'pad.boost') + item('RS', 'pad.aim') + item('RB', 'pad.cast') + item('Start', 'pad.pause');
+    key = 'sea'; html = item('LS', 'pad.sail') + item('RT', 'pad.boost') + item('LB/RB/Y', 'pad.cast') + item('Start', 'pad.pause');
   } else if (s === 'dead' || s === 'won') { key = 'end'; html = item('A', 'pad.again') + item('B', 'pad.menu'); }
   const full = key + document.documentElement.lang;
   bar.classList.toggle('on', !!key);

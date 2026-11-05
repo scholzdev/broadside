@@ -12,6 +12,7 @@ export const EN_HEAT: Record<string, string> = {
   'endless.retire': 'Retire (win now)', 'endless.retireText': 'End the run as a victory.',
   'endless.sail': 'Sail On', 'endless.sailText': 'Endless waves: every 90 s the enemies grow stronger, a boss every 3rd step.',
   'endless.step': 'Endless step {n}', 'endless.stronger': 'The enemies grow stronger', 'endless.boss': 'A boss emerges!',
+  'menu.retire': 'Retire (win)',
   'endless.hud': 'Step {n}', 'endless.next': 'next {t}',
   'end.endless': 'Endless: reached step {n} (+{d} Doubloons before multipliers)',
   'log.endless': 'Best endless step', 'log.heat': 'Best Heat cleared',

@@ -181,6 +181,12 @@ export function chooseEndless(sail: boolean): void {
   G.boss = null; G.lootT = 0;
   G.state = 'playing';
 }
+/** Pause menu "Retire" while endless is active: ends the run as a win through the normal settle path. */
+export function retireEndless(): void {
+  if (G.state !== 'paused' || !END.on) return;
+  hideMenu();
+  endRun(true);
+}
 export function setSail(): void {
   if (G.state !== 'loot') return;
   clearEnemies();
@@ -229,8 +235,8 @@ function checkDeath(): void {
 export function endRun(won: boolean): void {
   if (G.state === 'dead' || G.state === 'won') return;
   G.state = won ? 'won' : 'dead';
-  bump(won ? 'wins' : 'deaths');
-  if (won) { runCount('win'); checkSeaQuests(); }
+  if (!(won && END.on)) bump(won ? 'wins' : 'deaths');
+  if (won && !END.on) { runCount('win'); checkSeaQuests(); } // endless: the win was already counted when Sail On was chosen
   showEnd(won, settleRun(doubloonMul()));
 }
 

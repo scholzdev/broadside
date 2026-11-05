@@ -5,7 +5,7 @@ import { MODS, MOD_IDS, ModuleId } from './modules';
 import { RELIC_IDS, RelicId, CREW_IDS, CrewId } from './relics';
 import { SPELLS } from './spelldata';
 import { t } from './i18n';
-import { unlockName, shipName, shipBlurb, capName, capUp, capDown, spellName, spellText, modName, modInfo, modActive, relicName, relicDesc, crewName, crewText, slotName, slotCount } from './lname';
+import { unlockName, shipName, shipBlurb, capName, capUp, capDown, spellName, spellText, modName, modInfo, modActiveLine, relicName, relicDesc, crewName, crewText, slotName, slotCount } from './lname';
 import { portrait } from './portraits';
 import { bossName } from './lname';
 import { BOSS_IDS, SEAS } from './seas';
@@ -56,7 +56,7 @@ function describe(id: string): string {
   if (k === 'relic') return `<p>${relicDesc(v as RelicId)}</p>`;
   if (k === 'crew') return `<p>${crewText(v as CrewId)}</p>`;
   const m = MODS[v as ModuleId];
-  return `<p>${modInfo(m.id)}</p><div class="lsub">${slotName(m.slot)}</div><div class="spl"><b>${modActive(m.id).name}</b> <small>${t('auto')} &middot; ${m.active.cd}s</small> &middot; ${modActive(m.id).text}</div>`;
+  return `<p>${modInfo(m.id)}</p><div class="lsub">${slotName(m.slot)}</div>${modActiveLine(m.id)}`;
 }
 function logbook(): string {
   const s = M.stats, lv = Object.entries(s.maxModLevel).map(([k, v]) => t('log.lv', { name: MODS[k as ModuleId] ? modName(k as ModuleId) : k, n: v })).join(', ') || t('un.none');

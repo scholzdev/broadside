@@ -4,7 +4,7 @@ import { Card, StatLine, fmtVal } from './cards';
 import { MODS } from './modules';
 import { L } from './loadout';
 import { t } from './i18n';
-import { modName, modInfo, modActive, slotName, statLabel } from './lname';
+import { modName, modInfo, modActive, slotName, slotKeyBadge, statLabel } from './lname';
 import { ICON, modIcon, upgradeIcon, shipIcon, crewIcon } from './icons';
 import { crewName } from './lname';
 import { shopPrice, buyBlock } from './loot';
@@ -26,7 +26,8 @@ export const noteLine = (n: string): string => `<div class="ln nt">${n}</div>`;
 function body(c: Card): string {
   if (c.kind === 'newmod' && c.mod) {
     const m = MODS[c.mod];
-    return `<p class="cinfo">${modInfo(m.id)}</p><div class="cact"><b>${modActive(m.id).name}</b> <small>${m.active.cd}s</small><br>${modActive(m.id).text}</div><div class="cslot">${slotName(m.slot)}</div>`;
+    const act = slotKeyBadge(m.slot) ? `${slotKeyBadge(m.slot)} <b>${modActive(m.id).name}</b> <small>${m.active.cd}s</small><br>${modActive(m.id).text}` : t('mod.noActive');
+    return `<p class="cinfo">${modInfo(m.id)}</p><div class="cact">${act}</div><div class="cslot">${slotName(m.slot)}</div>`;
   }
   if (!c.lines.length) return `<p class="cinfo">${c.text}</p>`;
   return `<div class="lines">${c.lines.map(line).join('')}${(c.notes ?? []).map(noteLine).join('')}</div>${c.unlock ? `<div class="cunl">${t(c.kind === 'crew' ? 'card.advUnlock' : 'card.lv4', { x: c.unlock })}</div>` : ''}`;
@@ -48,7 +49,7 @@ export function cardHtml(c: Card, i: number): string {
     <i class="stud tl"></i><i class="stud tr"></i><i class="stud bl"></i><i class="stud br"></i>
     <div class="medal"><div class="mi"${ready ? '' : ` data-thumb="${tk}"`}>${medal}</div></div>
     <div class="trow"><span class="mini">${mod ? modIcon(mod.id) : shipIcon(L.ship)}</span><span class="tbadge">${ty.icon}</span><span class="tlv">${level}</span></div>
-    <div class="tlabel">${t('card.type.' + c.kind)}</div>
+    <div class="tlabel">${t('card.type.' + c.kind)}${c.kind === 'ability' && mod ? ' ' + slotKeyBadge(mod.slot) : ''}</div>
     <div class="cbody">${body(c)}${cardSynergyHtml(c)}</div>
     <div class="rar">${rar}</div><span class="k">${i + 1}</span></div>`;
 }

@@ -12,7 +12,7 @@ import { EN_MUSIC } from './en-music';
 import { EN_COSMETICS } from './en-cosmetics';
 import { EN_MODS3 } from './en-mods3';
 import { EN_EVO } from './en-evo';
-import { EN_MANUAL } from './en-manual';
+import { EN_SLOTS } from './en-slots';
 // English UI strings (keys are stable ids; {name} placeholders are filled by t()). Content tables keep their English text in their data files.
 export const EN: Record<string, string> = {
   // title / pause / help
@@ -21,11 +21,11 @@ export const EN: Record<string, string> = {
   'menu.restart': 'Restart run', 'menu.main': 'Main menu', 'menu.volume': 'Volume', 'menu.sound': 'Sound: {v}', 'on': 'On', 'off': 'Off',
   'menu.gfx': 'Graphics: {v}', 'gfx.auto': 'Auto', 'gfx.high': 'High', 'gfx.medium': 'Medium', 'gfx.low': 'Low', 'menu.lang': 'Language: {v}',
   'lang.en': 'English', 'lang.de': 'Deutsch', 'menu.relic': 'Relic: <b>{name}</b> &mdash; {desc}',
-  'controls': '<b>W / S</b> accelerate / brake &middot; <b>A / D</b> steer &middot; <b>Hold Shift</b> boost (nitro) &middot; <b>Space</b> / click captain spell &middot; modules fire automatically',
+  'controls': '<b>W / S</b> accelerate / brake &middot; <b>A / D</b> steer &middot; <b>Hold Shift</b> boost (nitro) &middot; <b>Q / E / R</b> fire the bow / stern / side ability &middot; your captain spell casts itself',
   'help.title': 'How to Play',
   'help.1': '<b>W / S</b> accelerate / brake &middot; <b>A / D</b> steer',
   'help.2': '<b>Hold Shift</b> boost (nitro meter: {dur} s of {spd}x speed, refills in {cd} s)',
-  'help.3': '<b>Space</b> or <b>left click</b> casts your captain&rsquo;s signature spell (some aim at the mouse) &middot; module actives fire automatically (AUTO).',
+  'help.3': 'Module actives belong to their mount slot: <b>Q</b> fires the bow, <b>E</b> the stern, <b>R</b> the sides (gamepad: <b>LB</b> / <b>RB</b> / <b>Y</b>; every ready module in that slot fires). Deck modules have no active. Your captain&rsquo;s signature spell casts itself when it fits (aimed spells pick the biggest crowd or the boss).',
   'help.4': 'Cannons fire on their own at targets inside their arcs. Aim by turning your hull.',
   'help.5': 'Collect gold and XP from wrecks and floating crates. Pick a free card on each level-up; spend gold on the two cards in the buy row below.',
   'help.6': 'Sink the boss before time runs out. Each boss drops plunder: pick a card (and buy more with gold).',
@@ -38,12 +38,12 @@ export const EN: Record<string, string> = {
   'slots.deck.one': '{n} deck slot', 'slots.deck.many': '{n} deck slots', 'slots.stern.one': '{n} stern slot', 'slots.stern.many': '{n} stern slots',
   'slot.bow': 'bow slot', 'slot.side': 'side slot', 'slot.deck': 'deck slot', 'slot.stern': 'stern slot',
   'lo.starts': 'Starts with {list}', 'lo.noDeck': 'The {ship} has no deck slot: no Sea Witch.', 'lo.noRegen': '{name} cannot regenerate.', 'lo.noDrawback': 'No drawback',
-  'lo.space': 'Space: {name}', 'lo.crewNone': 'No chosen crew: you sail with 2 Musketeers. Recruit and train more crew with cards.', 'lo.defMods': "Start with the ship's default modules: {list}.",
+  'lo.space': 'Spell (casts itself): {name}', 'lo.crewNone': 'No chosen crew: you sail with 2 Musketeers. Recruit and train more crew with cards.', 'lo.defMods': "Start with the ship's default modules: {list}.",
   'lo.replaces': 'replaces {list}', 'lo.addedFree': 'added to the free slot', 'lo.relicNone': 'Sail without a relic.', 'lo.yours': 'Your loadout',
   'lo.buy': 'Buy &middot; {n} {dbl}', 'lo.chosen': '&#10003; Chosen', 'lo.choose': 'Enter or click to choose', 'lo.back': '&lsaquo; Back',
   'lo.hint': 'Up / Down or Tab: category &middot; Left / Right: pick &middot; Enter: choose / buy / sail &middot; Esc: back',
   'lo.sail': 'Set Sail!', 'lo.enter': 'Enter', 'lo.unlockFirst': 'Unlock {name} first ({cost} {dbl} or its challenge)',
-  'lo.drag': 'Drag to rotate &middot; Scroll to zoom &middot; Right-drag to pan', 'lo.reset': '&#8634; Reset view', 'auto': 'AUTO',
+  'lo.drag': 'Drag to rotate &middot; Scroll to zoom &middot; Right-drag to pan', 'lo.reset': '&#8634; Reset view',
   // unlocks
   'un.title': 'Unlocks', 'un.sec.0': 'Ships', 'un.sec.1': 'Captains', 'un.sec.2': 'Crew', 'un.sec.3': 'Modules', 'un.sec.4': 'Relics',
   'un.kind.0': 'Ship', 'un.kind.1': 'Captain', 'un.kind.2': 'Crew', 'un.kind.3': 'Module', 'un.kind.4': 'Relic',
@@ -51,13 +51,13 @@ export const EN: Record<string, string> = {
   'un.openLog': 'Open the Logbook', 'un.hint': 'Up / Down or Tab: section &middot; Left / Right: item &middot; Enter: buy / toggle pool &middot; Esc: back',
   'un.locked': 'Locked', 'un.unlocked': '&#10003; Unlocked', 'un.starting': '&#9733; Starting item', 'un.pool': 'In pool: {v}',
   'un.poolHint': 'Off removes it from level-up, loot and shop cards.', 'un.shipInfo': 'Hull {hp} &middot; speed {sp} &middot; starts with {list}', 'un.or': 'or', 'un.none': 'none',
-  'log.runs': 'Runs started', 'log.kills': 'Ships sunk', 'log.fullSails': 'Full Sails used', 'log.rerolls': 'Rerolls', 'log.autoCasts': 'Actives auto-cast',
+  'log.runs': 'Runs started', 'log.kills': 'Ships sunk', 'log.fullSails': 'Full Sails used', 'log.rerolls': 'Rerolls', 'log.autoCasts': 'Slot abilities fired',
   'log.burned': 'Enemies burned', 'log.rams': 'Enemies rammed', 'log.boats': 'Fishing boats eaten', 'log.crates': 'Crates eaten', 'log.huts': 'Dock huts eaten',
   'log.buys': 'Upgrades bought with gold', 'log.winloss': 'Runs won / lost', 'log.doubloons': 'Doubloons earned (total)', 'log.damage': 'Damage taken',
   'log.bestAct': 'Best act reached', 'log.bosses': 'Bosses defeated (acts 1-4)', 'log.modLv': 'Highest module levels', 'log.lv': '{name} Lv {n}',
   // challenges
   'ch.act': 'Reach act {n}', 'ch.boss': 'Defeat the {name}', 'ch.lv8': 'Get {name} to Lv 8', 'ch.bosses3': 'Defeat 3 bosses',
-  'ch.fullSails': 'Use Full Sail {n} times', 'ch.rerolls': 'Reroll {n} times', 'ch.sink': 'Sink {n} ships', 'ch.autoCasts': 'Auto-cast actives {n} times',
+  'ch.fullSails': 'Use Full Sail {n} times', 'ch.rerolls': 'Reroll {n} times', 'ch.sink': 'Sink {n} ships', 'ch.autoCasts': 'Fire slot abilities (Q / E / R) {n} times',
   'ch.burn': 'Burn {n} enemies', 'ch.crates': 'Eat {n} crates', 'ch.earn': 'Earn {n} doubloons in total', 'ch.win': 'Win a run', 'ch.buys': 'Buy {n} upgrades with gold',
   'ch.huts': 'Eat {n} dock huts', 'ch.die': 'Die {n} times', 'ch.ram': 'Ram {n} enemies', 'ch.boats': 'Eat {n} fishing boats', 'ch.damage': 'Take {n} damage total',
   // HUD
@@ -69,7 +69,7 @@ export const EN: Record<string, string> = {
   'card.type.auto': 'AUTO-ATTACK', 'card.type.ability': 'ABILITY', 'card.type.newmod': 'NEW MODULE', 'card.type.ship': 'SHIP',
   'rar.common': 'Common', 'rar.uncommon': 'Uncommon', 'rar.rare': 'Rare', 'rar.epic': 'Epic', 'card.shipUp': 'Ship upgrade', 'card.newMount': 'New mount',
   'card.lv4': '<b>Lv 4 unlocks</b> {x}', 'card.newModule': 'New module: {name}', 'card.autoAttack': 'Auto-attack', 'card.trackText': '{name} Lv {n}: {lines}',
-  'card.mount': '{info} <b class="slot">{slot}</b> Active: {an} ({cd}s) — {at}',
+  'card.mount': '{info} <b class="slot">{slot}</b> Active ({k}): {an} ({cd}s) — {at}',
   // ship upgrades (cards)
   'up.cannon.n': 'Extra Cannon', 'up.cannon.t': '+1 ball per broadside side ({a} → {b})',
   'up.rate.n': 'Fire Rate', 'up.rate.t': 'Cooldown −12% ({a}s → {b}s)',
@@ -89,10 +89,10 @@ export const EN: Record<string, string> = {
   'set.shake': 'Screen shake: {v}', 'shake.off': 'Off', 'shake.low': 'Low', 'shake.normal': 'Normal', 'set.nums': 'Damage numbers: {v}', 'set.arcs': 'Firing arcs: {v}',
   'set.reset': 'Reset progress', 'set.resetSure': 'Really reset? Press again', 'set.resetDone': 'Progress reset', 'set.resetNote': 'Deletes doubloons, unlocks, stats and your saved loadout.',
   'set.hint': 'Up / Down: select &middot; Left / Right or Enter: change &middot; Esc: back',
-  'ctl.move': 'Accelerate / brake', 'ctl.steer': 'Steer', 'ctl.boost': 'Boost (nitro)', 'ctl.spell': 'Captain spell', 'ctl.aim': 'Aim spells', 'ctl.cards': 'Pick card / reroll',
-  'ctl.pause': 'Pause', 'ctl.mute': 'Mute', 'ctl.zoom': 'Zoom', 'key.hold': 'Hold Shift', 'key.click': 'Space / Left click', 'key.mouse': 'Mouse', 'key.wheel': 'Mouse wheel',
+  'ctl.move': 'Accelerate / brake', 'ctl.steer': 'Steer', 'ctl.boost': 'Boost (nitro)', 'ctl.cards': 'Pick card / reroll',
+  'ctl.pause': 'Pause', 'ctl.mute': 'Mute', 'ctl.zoom': 'Zoom', 'key.hold': 'Hold Shift', 'key.wheel': 'Mouse wheel',
   // popups
   'pop.headshot': 'Headshot!', 'pop.pumped': 'Pumped!', 'pop.surgeon': 'Surgeon!', 'pop.secondWind': 'Second Wind!', 'pop.bigBlast': 'BIG BLAST!',
   'pop.gold15': '+15 gold', 'pop.grog': 'Grog! +25 HP', 'pop.bribed': 'Bribed!',
 };
-Object.assign(EN, EN_CARDFMT, EN_INV, EN_LOOT, EN_QUESTS, EN_SEAS, EN_ENEMIES, EN_BOSSES, EN_CREW, EN_HEAT, EN_MUSIC, EN_TUT, EN_MODS3, EN_COSMETICS, EN_EVO, EN_MANUAL);
+Object.assign(EN, EN_CARDFMT, EN_INV, EN_LOOT, EN_QUESTS, EN_SEAS, EN_ENEMIES, EN_BOSSES, EN_CREW, EN_HEAT, EN_MUSIC, EN_TUT, EN_MODS3, EN_COSMETICS, EN_EVO, EN_SLOTS);

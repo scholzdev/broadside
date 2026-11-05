@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { G, scene, addModule, refreshStats, addGold } from './game';
 import { L } from './loadout';
-import { MODS, ModuleId, Owned, MAX_MOD_LV, SLOT_ORDER } from './modules';
+import { MODS, ModuleId, Owned, MAX_MOD_LV, SLOT_ORDER, SLOT_KEY } from './modules';
 import type { ArcId } from './content';
 import { Enemy, onEnemyDamaged } from './enemies';
 import type { Card } from './cards';
@@ -17,12 +17,12 @@ import { baseDmg, stepFxQueue, clearFx, ring } from './evofx';
 import { stepSyn, resetSyn, synFired, activeSynergies, SYNERGIES, synName, synText, modSynergyText } from './synergies';
 import { initEvoUi, toast } from './evoui';
 
-// ---- v10 evolutions: a module with BOTH tracks at Lv 8 is offered an Evolution card; picking it sets `auto.evo = 1` on its stat record (reset with the run),
+// ---- v10 evolutions: a module with BOTH tracks at Lv 8 (deck modules: the auto track, they have no active) is offered an Evolution card; picking it sets `auto.evo = 1` on its stat record (reset with the run),
 // applies the one-off stat changes of its EvoDef and switches on its fire / cast / step behaviours. ----
 export const isEvolved = (id: ModuleId): boolean => !!G.modStats[id]?.auto.evo;
 export const canEvolve = (ms: StatMap, id: ModuleId): boolean => {
   const s = ms[id];
-  return !!s && !s.auto.evo && s.autoLv >= MAX_MOD_LV && s.abilityLv >= MAX_MOD_LV;
+  return !!s && !s.auto.evo && s.autoLv >= MAX_MOD_LV && (s.abilityLv >= MAX_MOD_LV || !SLOT_KEY[MODS[id].slot]);
 };
 
 /** Level-up / loot candidates: one Evolution card per ready module, heavily weighted so it shows up on the very next pick. */

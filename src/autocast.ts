@@ -1,63 +1,61 @@
 import { G } from './game';
-import { ModuleId } from './modules';
-import { SLOTS, ArcId } from './content';
-import { arcHalf } from './arcs';
+import { L, CaptainId } from './loadout';
+import { SPELLS } from './spelldata';
+import { spellTarget } from './aim';
+import { castSpell, spellCd } from './spells';
 import { enemyGrid } from './enemies';
 import { projectiles } from './weapons';
+import { edibles, orbs } from './edibles';
 
-// ---- auto-cast conditions: when a ready, non-signature active may fire by itself. Tune the numbers here. ----
-const D = Math.PI / 180;
-const wrapA = (a: number): number => Math.atan2(Math.sin(a), Math.cos(a));
-
-interface Foe { d: number; rel: number }
-/** Living enemies within r of the ship, with distance and bearing relative to the heading (0 = dead ahead, +left). */
-function foes(r: number): Foe[] {
-  const p = G.player, out: Foe[] = [];
-  enemyGrid.query(p.x, p.z, r + 6, e => {
-    if (e.dead) return;
-    const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz) - e.r * 0.5;
-    if (d < r) out.push({ d, rel: wrapA(Math.atan2(dx, dz) - p.heading) });
-  });
-  return out;
+// ---- the captain spell has no key: it fires by itself when its condition holds (module abilities are Q / E / R, see abilities.ts). Tune the numbers here. ----
+const p = (): typeof G.player => G.player;
+/** Living enemies within r of the ship (bosses excluded with `noBoss`). */
+function foes(r: number, noBoss = false): number {
+  const s = p();
+  let n = 0;
+  enemyGrid.query(s.x, s.z, r + 6, e => { if (!e.dead && !(noBoss && e.bd) && Math.hypot(e.x - s.x, e.z - s.z) < r + e.r * 0.5) n++; });
+  return n;
 }
-const inArc = (f: Foe, arc: ArcId): boolean => Math.abs(wrapA(f.rel - SLOTS[arc].center)) <= arcHalf(arc);
-const shots = (r: number): number => {
-  const p = G.player;
-  return projectiles.reduce((n, q) => n + ((q.kind === 'eball' || q.kind === 'eshell' || q.kind === 'skull') && Math.hypot(q.x - p.x, q.z - p.z) < r ? 1 : 0), 0);
-};
-/** Highest HP among living enemies within 35 u. */
-const strongest = (): number => {
-  const p = G.player;
-  let m = 0;
-  enemyGrid.query(p.x, p.z, 41, e => { if (!e.dead && Math.hypot(e.x - p.x, e.z - p.z) < 35) m = Math.max(m, e.hp); });
-  return m;
-};
+const shots = (r: number): number => projectiles.reduce((n, q) => n + ((q.kind === 'eball' || q.kind === 'eshell' || q.kind === 'skull') && Math.hypot(q.x - p().x, q.z - p().z) < r ? 1 : 0), 0);
+const boss = (r: number): boolean => !!G.boss && !G.boss.dead && Math.hypot(G.boss.x - p().x, G.boss.z - p().z) < r;
+const loot = (r: number): number => [...edibles, ...orbs].reduce((n, o) => n + (!o.dead && Math.hypot(o.x - p().x, o.z - p().z) < r ? 1 : 0), 0);
 const hpFrac = (): number => G.hp / G.maxHp;
-
-export const AUTO_COND: Record<ModuleId, () => boolean> = {
-  broadside: () => foes((G.modStats.broadside?.auto.range ?? 0) * G.st.rangeMul).some(f => inArc(f, 'port') || inArc(f, 'starboard')),
-  chaser: () => foes(25).some(f => inArc(f, 'bow')),
-  mortar: () => true, // CAST checks for enemies in range
-  witch: () => true,
-  kegs: () => foes(14).some(f => Math.abs(f.rel) > Math.PI / 2) || foes(12).length >= 3,
-  boarding: () => foes(25).length >= 2 || (!!G.boss && !G.boss.dead && Math.hypot(G.boss.x - G.player.x, G.boss.z - G.player.z) < 25),
-  siphon: () => foes(9).length >= 3 || foes(5).length >= 1,
-  ward: () => shots(12) >= 3 || (hpFrac() < 0.4 && shots(12) >= 1),
-  ram: () => G.player.speed > 0.4 * G.st.maxSpeed && foes(9).some(f => Math.abs(f.rel) <= 15 * D),
-  lantern: () => hpFrac() < 0.3 && foes(8).length >= 1,
-  harpoon: () => foes(22).length >= 2 || (!!G.boss && !G.boss.dead && Math.hypot(G.boss.x - G.player.x, G.boss.z - G.player.z) < 25),
-  carronade: () => foes(10).filter(f => inArc(f, 'port') || inArc(f, 'starboard')).length >= 2,
-  rockets: () => foes(24).length >= 4,
-  net: () => foes((G.modStats.net?.ability.radius ?? 12) * 0.8).length >= 4,
-  crowsnest: () => (!!G.boss && !G.boss.dead && Math.hypot(G.boss.x - G.player.x, G.boss.z - G.player.z) < 38) || foes(35).some(() => true) && strongest() >= 60,
-  pump: () => hpFrac() < 0.45,
-  swivel: () => foes(18).some(f => inArc(f, 'bow')),
-  chain: () => foes(14).filter(f => inArc(f, 'port') || inArc(f, 'starboard')).length >= 2 || foes(16).length >= 4,
-  firearrows: () => foes(22).length >= 3,
-  bombketch: () => foes(22).some(f => inArc(f, 'stern')) || foes(14).length >= 4,
-  tesla: () => foes(14).length >= 3,
-  gatling: () => foes(14).filter(f => inArc(f, 'port') || inArc(f, 'starboard')).length >= 2,
-  sharkcage: () => foes(25).length >= 2 || (!!G.boss && !G.boss.dead && Math.hypot(G.boss.x - G.player.x, G.boss.z - G.player.z) < 30),
-  spyglass: () => foes(40).length >= 2 && foes(40).some(f => f.d > 20),
-  magnet: () => foes(24).length === 0, // nothing to fight: safe to gather the loot
+/** Aimed spells: a boss in range, or a cluster of at least n enemies around the auto-aim point. */
+const aimed = (id: CaptainId, n: number): boolean => {
+  const d = SPELLS[id], t = spellTarget(d.maxRange ?? 20, d.radius ?? 6);
+  return !!t && (boss(d.maxRange ?? 20) || t.n >= n);
 };
+const busy = (n: number, r = 22): boolean => foes(r) >= n || boss(r + 8);
+
+export const SPELL_COND: Record<CaptainId, () => boolean> = {
+  salt: () => hpFrac() < 0.55, // Patch Up
+  rosa: () => foes(10) >= 3 || (hpFrac() < 0.5 && foes(14) >= 1), // Tailwind
+  bess: () => foes(10) >= 3 || shots(12) >= 3 || (hpFrac() < 0.5 && foes(15) >= 1), // Iron Hull
+  tom: () => aimed('tom', 2), // Lucky Barrel
+  corvo: () => foes(15) >= 4 || boss(15) || (hpFrac() < 0.6 && foes(15) >= 2), // Blood Tithe
+  hana: () => busy(5, 25), // Dead Eye
+  morwen: () => aimed('morwen', 4), // Maelstrom
+  flint: () => aimed('flint', 3), // Firebomb
+  gwen: () => loot(30) >= 5, // Plunder
+  dorian: () => shots(10) >= 3 || (boss(20) && shots(12) >= 1), // Riposte
+  thorne: () => busy(4), // Rally the Guns
+  isabeau: () => busy(5, 30), // Royal Escort
+  driftwood: () => shots(12) >= 2 || foes(8) >= 2 || (hpFrac() < 0.5 && foes(15) >= 1), // Flotsam Shield
+  goldtooth: () => foes(18, true) >= 4, // Bribe
+  cass: () => shots(14) >= 4 || foes(12) >= 6 || (hpFrac() < 0.35 && foes(15) >= 1), // Time Stop
+  brick: () => busy(4), // All Hands
+  ines: () => foes(12) <= 1, // Treasure Sense: in a quiet moment
+  ghost: () => foes(8) >= 3 || shots(10) >= 3 || (hpFrac() < 0.35 && foes(12) >= 1), // Phantom Ship
+  hal: () => boss(25) || foes(25) >= 1, // Harpoon (boss first, else the biggest hull)
+  coral: () => aimed('coral', 4), // Hex
+};
+
+const RETRY = 0.25;
+let wait = 0;
+/** Fixed step: a ready spell checks its condition every RETRY s and casts when it holds. */
+export function stepSpellAuto(dt: number): void {
+  if (G.state !== 'playing' || spellCd().cd > 0 || (wait -= dt) > 0) return;
+  wait = RETRY;
+  if (SPELL_COND[L.captain]()) castSpell();
+}
+export const resetSpellAuto = (): void => { wait = 0; };

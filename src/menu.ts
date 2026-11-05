@@ -1,4 +1,5 @@
-import { G, startRun, togglePause, restartRun, toMainMenu, QUICK } from './game';
+import { G, startRun, togglePause, restartRun, toMainMenu, retireEndless, QUICK } from './game';
+import { END } from './heatdefs';
 import { L, setLoadout, loadSaved } from './loadout';
 import { initShip } from './ship';
 import { audio, setVolume } from './audio';
@@ -33,10 +34,10 @@ function html(): string {
     case 'help': {
       const FS = deriveStats({});
       const hp = { dur: FS.fullDur, spd: FS.fullSpd, cd: Math.round(FS.fullCd) };
-      return `<div class="mbox"><h2>${t('help.title')}</h2><ul class="help">${[1, 2, 3, 4, 5, 6, 7].map(n => `<li>${t(n === 3 && S.manual ? 'help.3m' : 'help.' + n, hp)}</li>`).join('')}</ul><div class="mbtns">${btn(0, 'back', t('menu.back'))}</div></div>`;
+      return `<div class="mbox"><h2>${t('help.title')}</h2><ul class="help">${[1, 2, 3, 4, 5, 6, 7].map(n => `<li>${t('help.' + n, hp)}</li>`).join('')}</ul><div class="mbtns">${btn(0, 'back', t('menu.back'))}</div></div>`;
     }
     case 'pause':
-      return `<div class="mbox"><h2>${t('menu.paused')}</h2><p class="ctl hk">${t(S.manual ? 'controlsManual' : 'controls')}</p><p class="ctl hp">${t(S.manual ? 'controlsPadManual' : 'controlsPad')}</p>${L.relic ? `<p class="sub">${t('menu.relic', { name: relicName(L.relic), desc: relicDesc(L.relic) })}</p>` : ''}<div class="mbtns">${btn(0, 'resume', t('menu.resume'))}${btn(1, 'settings', t('menu.settings'))}${btn(2, 'restart', t('menu.restart'))}${btn(3, 'menu', t('menu.main'))}</div></div>`;
+      return `<div class="mbox"><h2>${t('menu.paused')}</h2><p class="ctl hk">${t('controls')}</p><p class="ctl hp">${t('controlsPad')}</p>${L.relic ? `<p class="sub">${t('menu.relic', { name: relicName(L.relic), desc: relicDesc(L.relic) })}</p>` : ''}<div class="mbtns">${btn(0, 'resume', t('menu.resume'))}${btn(1, 'settings', t('menu.settings'))}${END.on ? btn(2, 'retire', t('menu.retire')) : ''}${btn(END.on ? 3 : 2, 'restart', t('menu.restart'))}${btn(END.on ? 4 : 3, 'menu', t('menu.main'))}</div></div>`;
   }
 }
 const count = (): number => root.querySelectorAll('[data-i]').length;
@@ -76,6 +77,7 @@ function act(a: string, v: string): void {
     case 'resume': togglePause(); break;
     case 'tutorial': startTutorial(); break;
     case 'lang': case 'padvib': case 'sound': case 'gfx': case 'shake': case 'nums': case 'arcs': case 'abil': case 'reset': setAct(a); break;
+    case 'retire': retireEndless(); break;
     case 'restart': restartRun(); break;
     case 'menu': toMainMenu(); break;
   }

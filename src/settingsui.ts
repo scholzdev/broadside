@@ -13,7 +13,7 @@ let sure = false, done = false;
 const onoff = (b: boolean): string => t(b ? 'on' : 'off');
 const row = (i: number, act: string, text: string): string => `<button class="mbtn srow" data-i="${i}" data-act="${act}">${text}</button>`;
 const slider = (i: number, act: string, key: string, v: number): string => `<div class="mbtn vol srow" data-i="${i}" data-act="${act}"><span>${t(key)}</span><input type="range" min="0" max="100" value="${Math.round(v * 100)}" data-act="${act}"></div>`;
-const KEYS: [string, string][] = [['W / S', 'ctl.move'], ['A / D', 'ctl.steer'], ['key.hold', 'ctl.boost'], ['key.click', 'ctl.spell'], ['key.mouse', 'ctl.aim'], ['1 / 2 / 3, R', 'ctl.cards'], ['Esc / P', 'ctl.pause'], ['M', 'ctl.mute'], ['key.wheel', 'ctl.zoom']];
+const KEYS: [string, string][] = [['W / S', 'ctl.move'], ['A / D', 'ctl.steer'], ['key.hold', 'ctl.boost'], ['Q / E / R', 'ctl.abil'], ['1 / 2 / 3, R', 'ctl.cards'], ['Esc / P', 'ctl.pause'], ['M', 'ctl.mute'], ['key.wheel', 'ctl.zoom']];
 
 let resetI = -1;
 /** Rows are numbered in document order (sections may be added or removed freely); remembers the Reset row. */
@@ -25,13 +25,13 @@ export const settingsHtml = (): string => renumber(buildHtml());
 const padHtml = (g: string): string => `${g}<div class="hint padname">${pad.connected ? t('set.padName', { v: pad.id.slice(0, 48) }) : t('set.padNone')}</div>${slider(0, 'paddz', 'set.padDz', S.padDz)}${row(0, 'padvib', t('set.padVib', { v: onoff(S.vib) }))}${row(0, 'tutorial', t('set.tut'))}`;
 function buildHtml(): string {
   const g = (k: string): string => `<h3 class="sgrp">${t('set.g.' + k)}</h3>`;
-  const keys = (S.manual ? [...KEYS.slice(0, 4), ['Q / E / R', 'ctl.abil'], ...KEYS.slice(4)] : KEYS).map(([k, d]) => `<div class="krow"><kbd>${k.includes('.') ? t(k) : k}</kbd><span>${t(d)}</span></div>`).join('');
+  const keys = KEYS.map(([k, d]) => `<div class="krow"><kbd>${k.includes('.') ? t(k) : k}</kbd><span>${t(d)}</span></div>`).join('');
   return `<div class="mbox sset"><h2>${t('set.title')}</h2><div class="sscroll">
     ${g('general')}${row(0, 'lang', t('menu.lang', { v: t('lang.' + lang) }))}
     ${g('audio')}${row(1, 'sound', t('menu.sound', { v: onoff(!audio.muted) }))}
     ${slider(2, 'vol', 'menu.volume', audio.volume)}${slider(3, 'music', 'menu.music', audio.music)}${slider(4, 'sfx', 'menu.sfx', audio.sfx)}
     ${g('gfx')}${row(5, 'gfx', t('menu.gfx', { v: t('gfx.' + (S.quality ?? 'auto')) }))}${row(6, 'shake', t('set.shake', { v: t('shake.' + S.shake) }))}
-    ${row(7, 'nums', t('set.nums', { v: onoff(S.nums) }))}${row(8, 'arcs', t('set.arcs', { v: onoff(S.arcs) }))}${row(0, 'abil', t('set.abil', { v: t(S.manual ? 'abil.manual' : 'abil.auto') }))}
+    ${row(7, 'nums', t('set.nums', { v: onoff(S.nums) }))}${row(8, 'arcs', t('set.arcs', { v: onoff(S.arcs) }))}
     ${g('controls')}<div class="keys">${keys}</div>
     ${padHtml(g('pad'))}
     ${g('data')}${row(9, 'reset', sure ? t('set.resetSure') : done ? t('set.resetDone') : t('set.reset'))}<div class="hint">${t('set.resetNote')}</div></div>
@@ -52,7 +52,6 @@ export function settingsAct(a: string, d = 1): boolean {
     case 'shake': S.shake = cyc(SHAKES, S.shake, d); saveSettings(); return true;
     case 'nums': S.nums = !S.nums; saveSettings(); return true;
     case 'arcs': S.arcs = !S.arcs; saveSettings(); return true;
-    case 'abil': S.manual = !S.manual; saveSettings(); return true;
     case 'padvib': S.vib = !S.vib; saveSettings(); if (S.vib) testRumble(); return true;
     case 'reset':
       if (!sure) { sure = true; done = false; return true; }

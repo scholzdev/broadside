@@ -12,7 +12,7 @@ export const STEPS: { id: string; hl: string | null }[] = [
   { id: 's2', hl: '#abar .ab.fs' },
   { id: 's3', hl: null },
   { id: 's4', hl: null },
-  { id: 's5', hl: '#abar .ab.sp' },
+  { id: 's5', hl: '#abar .abg[data-s="side"]' },
   { id: 's6', hl: '#buyrow' },
   { id: 's7', hl: '.bossrow' },
 ];

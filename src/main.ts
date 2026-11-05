@@ -16,8 +16,7 @@ import { J, initJuice, applyShake, updateNumbers, setNumberFilter } from './juic
 import { renderHazards, fogHides } from './hazards';
 import { updateArrows } from './edgearrows';
 import { renderEdibles } from './edibles';
-import { renderSpells, spellCd } from './spells';
-import { updateAim, renderAim } from './aim';
+import { renderSpells } from './spells';
 import { initRender, resizeRender, setShadowExtent, renderFrame, prewarm } from './render';
 import { buildPendingIslands } from './props';
 import { projGeo, projMat } from './projvis';
@@ -132,8 +131,6 @@ function frame(now: number): void {
   renderSummons(t, alpha);
   renderEdibles(alpha, t);
   renderSpells(alpha, fdt, t, renderPos.x, renderPos.z);
-  updateAim(camera, now);
-  { const sc = spellCd(); renderAim(t, renderPos.x, renderPos.z, sc.cd, sc.cdMax); }
   updateWakes(fdt);
   buildPendingIslands(2.5); // islands from newly loaded cells, a few ms per frame
   stepFx(fdt);

@@ -15,8 +15,6 @@ export function setLastInput(src: 'keyboard' | 'gamepad'): void {
 }
 /** Synthetic key tap (gamepad -> menu / card / pause pipeline). */
 export const pushTap = (code: string): void => { taps.push(code); };
-/** Mouse in client pixels; `t` = time of the last move (ms), `inside` = pointer is over the window. */
-export const mouse = { x: 0, y: 0, t: -1e9, inside: false };
 const block = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Tab']);
 
 addEventListener('keydown', e => {
@@ -26,11 +24,10 @@ addEventListener('keydown', e => {
   held.add(e.code);
 });
 addEventListener('keyup', e => held.delete(e.code));
-addEventListener('blur', () => { held.clear(); mouse.inside = false; });
-addEventListener('pointermove', e => { if (Math.abs(e.clientX - mouse.x) + Math.abs(e.clientY - mouse.y) > 3) setLastInput('keyboard'); mouse.x = e.clientX; mouse.y = e.clientY; mouse.t = performance.now(); mouse.inside = true; });
-document.documentElement.addEventListener('mouseleave', () => { mouse.inside = false; });
-// a left click on the bare canvas (HUD panels and overlays sit above it) becomes a 'MouseLeft' tap; the menu stage keeps its own mouse use
-document.getElementById('c')?.addEventListener('pointerdown', e => { setLastInput('keyboard'); if (e.button === 0 && !input.lock) taps.push('MouseLeft'); });
+addEventListener('blur', () => held.clear());
+let mx = 0, my = 0;
+addEventListener('pointermove', e => { if (Math.abs(e.clientX - mx) + Math.abs(e.clientY - my) > 3) setLastInput('keyboard'); mx = e.clientX; my = e.clientY; });
+document.getElementById('c')?.addEventListener('pointerdown', () => setLastInput('keyboard'));
 addEventListener('wheel', e => {
   if (input.lock) return;
   input.zoom = Math.min(1.6, Math.max(0.6, input.zoom * (e.deltaY > 0 ? 1.08 : 0.92)));

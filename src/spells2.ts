@@ -15,13 +15,13 @@ import { spawnTreasure } from './edibles';
 import { stepBlasts, clearBlasts } from './relicfx';
 import { stepPassives } from './capfx';
 import { near, ring, rnd } from './spells';
-import { aim, aimPoint } from './aim';
+import { aimPoint } from './aim';
 import { fx, muzzle } from './particles';
 import { addTrauma, popText } from './juice';
 import { play } from './audio';
 import { lerp, lerpAngle } from './spatial';
 
-// ---- captains 11-20 spells (Space). Data in spelldata.ts; spells.ts dispatches casts, steps, renders and clears here. ----
+// ---- captains 11-20 spells (cast by themselves, see autocast.ts). Data in spelldata.ts; spells.ts dispatches casts, steps, renders and clears here. ----
 const TAU = Math.PI * 2;
 interface Escort { x: number; z: number; px: number; pz: number; ph: number; heading: number; a: number; life: number; fireT: number; model: ShipModel }
 interface Pull { e: Enemy; left: number }
@@ -55,9 +55,7 @@ function harpoon(): boolean {
   const p = G.player, foes = near(p.x, p.z, 25);
   if (!foes.length) return false;
   const big = (e: Enemy): number => (e.bd ? 1e6 : 0) + e.r * 100 + e.maxHp;
-  // mouse aim: the closest enemy to the cursor (bosses and big hulls count as nearer); otherwise the biggest in range
-  const score = (e: Enemy): number => aim.active ? -Math.hypot(e.x - aim.x, e.z - aim.z) + (e.bd ? 12 : 0) + e.r * 1.5 : big(e);
-  const e = foes.sort((a, b) => score(b) - score(a))[0];
+  const e = foes.sort((a, b) => big(b) - big(a))[0]; // boss first, then the biggest hull
   beam(p.x, p.z, e.x, e.z, 0xe8eef6, 0.5);
   fx(e.x, 1.4, e.z, 0xffffff, 0.5, 2.2, 0.25, 1, false, undefined, 'glow');
   damageEnemy(e, 100, true, 'spell');
@@ -149,7 +147,7 @@ export const CAST2: Partial<Record<CaptainId, () => boolean>> = {
   },
   hal: harpoon,
   coral() { // Hex
-    const c = aimPoint(14, 0), foes = near(c.x, c.z, 16);
+    const c = aimPoint(14, 0, 16), foes = near(c.x, c.z, 16);
     for (const e of foes) { e.hexT = 6; pop(e.x, e.z, 0xc060e0, 3, 4); }
     ring(c.x, c.z, 0xb050d0, 2, 16, 0.7, 0.7);
     addTrauma(0.2); play('tithe');

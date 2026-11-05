@@ -3,7 +3,7 @@ import { SLOTS, ArcId, arcHalfWith } from './content';
 import { MODS, ModuleId } from './modules';
 import { wrap } from './spatial';
 
-// ---- firing-arc geometry shared by targeting, custom autos, auto-cast conditions and the wedge visuals ----
+// ---- firing-arc geometry shared by targeting, custom autos and the wedge visuals ----
 const D = Math.PI / 180;
 
 /** Current half-width (radians) of an arc: base (or the module's own override) plus the run's Swivel bonus. */

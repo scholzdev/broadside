@@ -17,7 +17,7 @@ import { CAST2, stepSpells2, renderSpells2, clearSpells2 } from './spells2';
 import { rumSip } from './relicfx';
 import { aimPoint } from './aim';
 
-// ---- captain signature spells (Space). Data lives in spelldata.ts; casts are below. Sim runs in stepSpells (fixed step),
+// ---- captain signature spells (fire on their own, see autocast.ts). Data lives in spelldata.ts; casts are below. Sim runs in stepSpells (fixed step),
 // meshes are interpolated per frame in renderSpells, particles are fire-and-forget like the module actives. ----
 export const rnd = (a: number, b: number): number => a + Math.random() * (b - a);
 const TAU = Math.PI * 2;
@@ -49,7 +49,7 @@ function stream(x: number, z: number, color: number, n: number, life = 0.5): voi
 
 // ---- lobbed projectiles (Lucky Barrel, Firebomb) ----
 function lob(kind: Lob['kind'], dist: number, color: number, r: number): void {
-  const p = G.player, { x: tx, z: tz } = aimPoint(SPELLS[L.captain].maxRange ?? dist, dist);
+  const p = G.player, { x: tx, z: tz } = aimPoint(SPELLS[L.captain].maxRange ?? dist, dist, SPELLS[L.captain].radius);
   const mesh = kind === 'barrel' ? new THREE.Mesh(projGeo.keg, projMat.keg) : new THREE.Mesh(projGeo.shell, projMat.shell);
   if (kind === 'fire') mesh.scale.setScalar(1.5); else mesh.scale.setScalar(1.8);
   mesh.castShadow = true;
@@ -143,7 +143,7 @@ const CAST: Partial<Record<CaptainId, () => boolean>> = {
     return true;
   },
   morwen() { // Maelstrom
-    const { x, z } = aimPoint(SPELLS.morwen.maxRange ?? 18, 10);
+    const { x, z } = aimPoint(SPELLS.morwen.maxRange ?? 18, 10, SPELLS.morwen.radius);
     whirls.push({ x, z, t: 5, R: 8, spin: 0, tick: 0, inside: new Set() });
     ring(x, z, 0x8ad0ff, 2, 9, 0.7);
     addTrauma(0.25); play('swirl');

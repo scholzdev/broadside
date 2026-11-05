@@ -5,12 +5,9 @@ import { J } from './juice';
 import { padPickStep } from './padpick';
 
 // ---- Gamepad API (standard mapping) -> the same paths as the keyboard ----
-// Playing: left stick steers (x) and sets throttle (y), RT / A boost, right stick aims spells, RB / X cast, Start pause.
+// Playing: left stick steers (x) and sets throttle (y), RT / A boost, LB / RB / Y fire the bow / stern / side abilities (= Q / E / R), Start pause.
 // Menus / cards: D-pad or left stick navigate, A confirm, B back, Y reroll, LB / RB tabs. Everything becomes synthetic key taps (pushTap).
 const B = { A: 0, B: 1, X: 2, Y: 3, LB: 4, RB: 5, LT: 6, RT: 7, SEL: 8, START: 9, UP: 12, DOWN: 13, LEFT: 14, RIGHT: 15 };
-/** Right-stick aim in world space (camera yaw 45 deg); read by aim.ts while the gamepad is the last input. */
-export const padAim = { dx: 0, dz: 0, mag: 0, t: -1e9 };
-const AIM_IDLE_MS = 4000, SQ = Math.SQRT1_2;
 let prev: boolean[] = [], navHeld = '', navT = 0, lastTrauma = 0, lastFlash = 0;
 
 const dead = (v: number, dz: number): number => (Math.abs(v) < dz ? 0 : Math.sign(v) * (Math.abs(v) - dz) / (1 - dz));
@@ -51,25 +48,17 @@ function poll(now: number): void {
   const down = (i: number): boolean => !!gp.buttons[i]?.pressed;
   const edge = (i: number): boolean => down(i) && !prev[i];
   const dz = S.padDz, ax = (i: number): number => gp.axes[i] ?? 0;
-  const lx = dead(ax(0), dz), ly = dead(ax(1), dz), rx = dead(ax(2), dz), ry = dead(ax(3), dz);
+  const lx = dead(ax(0), dz), ly = dead(ax(1), dz), rx = dead(ax(2), dz), ry = dead(ax(3), dz); // right stick: only marks the pad as the last input
   const anyBtn = gp.buttons.some((b, i) => b.pressed && !prev[i]);
   if (anyBtn || lx || ly || rx || ry) setLastInput('gamepad');
   const st = G.state;
   if (st === 'playing') {
     padIn.turn = -lx; padIn.fwd = ly < -0.3; padIn.back = ly > 0.3;
     padIn.boost = down(B.RT) || (gp.buttons[B.RT]?.value ?? 0) > 0.4 || down(B.A);
-    if (edge(B.RB) || edge(B.X)) pushTap('Space');
-    if (S.manual) { // manual abilities: only while sailing, so menu / card B, Y and LB keep their meaning
-      if (edge(B.LB)) pushTap('Ability0');
-      if (edge(B.Y)) pushTap('Ability1');
-      if (edge(B.B)) pushTap('Ability2');
-    }
+    if (edge(B.LB)) pushTap('KeyQ'); // slot abilities: only while sailing, so menu / card LB, RB and Y keep their meaning
+    if (edge(B.RB)) pushTap('KeyE');
+    if (edge(B.Y)) pushTap('KeyR');
     if (edge(B.START)) pushTap('KeyP');
-    const m = Math.hypot(rx, ry);
-    if (m > 0.05) { // screen-right = (1,-1)/sqrt2, screen-up = (-1,-1)/sqrt2 in world (x, z)
-      const sx = rx, su = -ry;
-      padAim.dx = (sx - su) * SQ; padAim.dz = (-sx - su) * SQ; padAim.mag = Math.min(1, m); padAim.t = now;
-    }
   } else {
     padIn.turn = 0; padIn.fwd = padIn.back = padIn.boost = false;
     if (st === 'levelup' || st === 'loot') padPickStep(navDir(gp, down, now), edge(B.A), edge(B.Y), edge(B.B));
@@ -95,5 +84,3 @@ requestAnimationFrame(poll);
 addEventListener('gamepadconnected', e => { pad.connected = true; pad.id = (e as GamepadEvent).gamepad.id; });
 /** Settings test button: a short rumble. */
 export const testRumble = (): void => { const gp = find(); if (gp) rumble(gp, 300, 0.8, 0.8); };
-/** True while the right stick (not the mouse) is aiming: the gamepad is the last input and the stick moved recently. */
-export const padAiming = (now: number): boolean => pad.lastInput === 'gamepad' && now - padAim.t < AIM_IDLE_MS;

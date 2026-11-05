@@ -7,6 +7,8 @@ export type ModuleId = 'broadside' | 'chaser' | 'mortar' | 'kegs' | 'ram' | 'boa
   | 'harpoon' | 'carronade' | 'rockets' | 'net' | 'crowsnest' | 'pump'
   | 'swivel' | 'chain' | 'firearrows' | 'bombketch' | 'tesla' | 'gatling' | 'sharkcage' | 'spyglass' | 'magnet';
 export const SLOT_ORDER: Slot[] = ['bow', 'side', 'deck', 'stern'];
+/** Module actives belong to mount slots: the key (and gamepad glyph) that fires each slot. Deck modules have no active. */
+export const SLOT_KEY: Partial<Record<Slot, { key: string; pad: string }>> = { bow: { key: 'Q', pad: 'LB' }, stern: { key: 'E', pad: 'RB' }, side: { key: 'R', pad: 'Y' } };
 export const MAX_MOD_LV = 8, PLUS_LV = 4;
 const D = Math.PI / 180;
 

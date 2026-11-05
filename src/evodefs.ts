@@ -58,7 +58,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
       addTrauma(0.1);
     } },
   mortar: { color: 0xffe9a0,
-    apply: ms => { mul(ms.auto, 'radius', 1.3); add(ms.ability, 'count', 4); },
+    apply: ms => { mul(ms.auto, 'radius', 1.3); },
     fire: c => {
       if (!c.t) return;
       const tx = c.t.x, tz = c.t.z, d = Math.hypot(tx - sx(), tz - sz());
@@ -192,7 +192,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
       after(1.2, () => { explosion(x, 0.8, z, r); blast(x, z, r, c.dmg * 1.5); });
     } },
   tesla: { color: 0x9fe8ff,
-    apply: ms => { add(ms.auto, 'jumps', 3); add(ms.ability, 'pulses', 1); },
+    apply: ms => { add(ms.auto, 'jumps', 3); },
     fire: c => {
       const list = inRange(sx(), sz(), 15).sort(() => Math.random() - 0.5).slice(0, 3);
       for (const e of list) { chainLightning(sx(), sz(), e, 1, 0, c.dmg * 0.7, 0.4, 3.4); }
@@ -221,7 +221,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
       fx(e.x, 1.5, e.z, 0xfff0a0, 0.5, 2.6, 0.3, 1, false, undefined, 'glow'); play('snipe'); addTrauma(0.1);
     } },
   magnet: { color: 0xffd84a,
-    apply: ms => { mul(ms.auto, 'range', 1.5); mul(ms.auto, 'gold', 2); add(ms.ability, 'mult', 1); } },
+    apply: ms => { mul(ms.auto, 'range', 1.5); mul(ms.auto, 'gold', 2); } },
 };
 
 /** Kraken Prow: tentacles seize the `n` nearest enemies within r: pulled in, stunned, hurt. */

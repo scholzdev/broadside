@@ -1,5 +1,6 @@
 // v10: Hitze (Schwierigkeit pro Meer) und Endlosmodus.
 export const DE_HEAT: Record<string, string> = {
+  'menu.retire': 'Zurückziehen (Sieg)',
   'heat.title': 'Hitze', 'heat.sel': 'Hitzestufe', 'heat.ironman': 'Ironman: keine Neuwürfe, kein Laden', 'heat.base': 'Normale Schwierigkeit.',
   'heat.1.name': 'Elite', 'heat.1.text': 'Elite-Schiffe (Goldrand, +80 % LP) mit einer Eigenschaft: schnell, gepanzert (-30 % erlittener Schaden) oder teilend (zwei Schwarmkutter beim Untergang).',
   'heat.2.name': 'Härtere Bosse', 'heat.2.text': 'Jeder Boss erhält ein zusätzliches Angriffsmuster.',
