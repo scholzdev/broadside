@@ -1,6 +1,6 @@
 import { t, lang, setLang, nextLang } from './i18n';
 import { audio, setMuted, setVolume, setMusicVol, setSfxVol } from './audio';
-import { S, QUALITIES, SHAKES, saveSettings, setQualityPref } from './settings';
+import { S, QUALITIES, SHAKES, STEERS, saveSettings, setQualityPref } from './settings';
 import { resetMeta } from './meta';
 import { resetCosmetics } from './cosmetics';
 import { setLoadout, saveLoadout, NO_EXTRAS } from './loadout';
@@ -32,7 +32,7 @@ function buildHtml(): string {
     ${slider(2, 'vol', 'menu.volume', audio.volume)}${slider(3, 'music', 'menu.music', audio.music)}${slider(4, 'sfx', 'menu.sfx', audio.sfx)}
     ${g('gfx')}${row(5, 'gfx', t('menu.gfx', { v: t('gfx.' + (S.quality ?? 'auto')) }))}${row(6, 'shake', t('set.shake', { v: t('shake.' + S.shake) }))}
     ${row(7, 'nums', t('set.nums', { v: onoff(S.nums) }))}${row(8, 'arcs', t('set.arcs', { v: onoff(S.arcs) }))}
-    ${g('controls')}<div class="keys">${keys}</div>
+    ${g('controls')}${row(0, 'steer', t('set.steer', { v: t('steer.' + S.steer) }))}<div class="keys">${keys}</div>
     ${padHtml(g('pad'))}
     ${g('data')}${row(9, 'reset', sure ? t('set.resetSure') : done ? t('set.resetDone') : t('set.reset'))}<div class="hint">${t('set.resetNote')}</div></div>
     <div class="mbtns">${row(10, 'back', t('menu.back'))}</div><div class="hint"><span class="hk">${t('set.hint')}</span><span class="hp">${t('set.hintPad')}</span><span class="ht">${t('set.hintTouch')}</span></div></div>`;
@@ -50,6 +50,7 @@ export function settingsAct(a: string, d = 1): boolean {
     case 'sound': setMuted(!audio.muted); return true;
     case 'gfx': { const all: (typeof S.quality)[] = [null, ...QUALITIES]; setQualityPref(cyc(all, S.quality, d)); return true; }
     case 'shake': S.shake = cyc(SHAKES, S.shake, d); saveSettings(); return true;
+    case 'steer': S.steer = cyc(STEERS, S.steer, d); saveSettings(); return true;
     case 'nums': S.nums = !S.nums; saveSettings(); return true;
     case 'arcs': S.arcs = !S.arcs; saveSettings(); return true;
     case 'padvib': S.vib = !S.vib; saveSettings(); if (S.vib) testRumble(); return true;

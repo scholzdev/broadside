@@ -10,8 +10,8 @@ import { PLAYER_SHIPS } from './fleet';
 import { L } from './loadout';
 import { makeArc } from './overlays';
 import { S } from './settings';
-import { turnAxis, fwdHeld, backHeld, boostHeld } from './input';
-import { lerp, lerpAngle } from './spatial';
+import { turnAxis, fwdHeld, backHeld, boostHeld, kbDrive, stickVec } from './input';
+import { lerp, lerpAngle, wrap } from './spatial';
 import { pushOut, wind } from './world';
 import { fx } from './particles';
 import { kick } from './juice';
@@ -83,6 +83,15 @@ export function shipFit(): { r: number; cx: number; cy: number; cz: number } {
   return fitCache;
 }
 
+/** Absolute stick steering: screen-up/right of the (yaw 45 deg) camera mapped to a world heading; null when keyboard tank steering is in use or the stick is idle. */
+const STICK_ON = 0.25;
+function stickAim(heading: number): { err: number; mag: number } | null {
+  if (S.steer !== 'stick' || kbDrive()) return null;
+  const v = stickVec();
+  if (v.mag < STICK_ON) return null;
+  const wx = (v.x - v.y) / Math.SQRT2, wz = (-v.x - v.y) / Math.SQRT2; // screen right = (1,-1)/sqrt2, screen up = (-1,-1)/sqrt2 in (x,z)
+  return { err: wrap(Math.atan2(wx, wz) - heading), mag: v.mag };
+}
 let shiftPrev = false;
 const NITRO_MIN = 0.1, NITRO_DELAY = 0.6;
 export function stepShip(dt: number): void {
@@ -102,10 +111,13 @@ export function stepShip(dt: number): void {
   const wm = 1 + 0.2 * Math.cos(p.heading - wind.angle);
   const maxV = s.maxSpeed * wm * (SP.tail > 0 ? 1.6 : 1) * (L.relic === 'mermaid' && G.hp > G.maxHp * 0.8 ? 1.15 : 1) * playerSpeedMul(); // Tailwind, Mermaid Scale, slow (reefs)
   const dash = G.buffs.ram > 0; // Ramming Speed
-  const gas = full || dash || (fwdHeld() && !backHeld());
+  const aim = stickAim(p.heading);
+  const gas = full || dash || (aim ? true : fwdHeld() && !backHeld());
+  // stick throttle: 40% at the deadzone edge up to 100% at 0.9 deflection, eased off while the bow is far from the wanted heading
+  const aimThr = aim ? (0.4 + 0.6 * Math.min(1, (aim.mag - STICK_ON) / (0.9 - STICK_ON))) * (1 - 0.65 * Math.max(0, Math.min(1, (Math.abs(aim.err) - 1.0) / 0.75))) : 1;
   p.thr = gas ? 1 : 0;
   if (gas) {
-    const target = maxV * (dash ? G.modStats.ram?.ability.dashSpd ?? 1 : full ? s.fullSpd : 1);
+    const target = maxV * (dash ? G.modStats.ram?.ability.dashSpd ?? 1 : full ? s.fullSpd : aimThr);
     vf += (target - vf) * (vf < target ? ACCEL_K * (dash ? 4 : 1) : COAST_K) * dt;
   } else if (backHeld() && !fwdHeld()) {
     if (vf > 0.5) vf = Math.max(0.5, vf - (vf * 2.5 + maxV * 0.5) * dt);
@@ -115,7 +127,7 @@ export function stepShip(dt: number): void {
   vl *= Math.exp(-LATERAL_DAMP * dt);
 
   // turn input ramps to full in ~0.12 s; rate is 55% at standstill, 100% at cruise
-  const ax = turnAxis(), ramp = dt / TURN_RAMP;
+  const ax = aim ? Math.max(-1, Math.min(1, aim.err * 2.5)) : turnAxis(), ramp = dt / TURN_RAMP;
   p.turnIn += Math.max(-ramp, Math.min(ramp, ax - p.turnIn));
   const cruise = s.maxSpeed * 0.7;
   const rate = TURN_BASE * s.turnMul * (0.55 + 0.45 * Math.min(1, Math.abs(vf) / cruise));

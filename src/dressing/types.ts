@@ -17,4 +17,8 @@ export interface Ctx { idx: number; n: number; balls: number; color: number; ani
 
 export type Build = (b: Builder, a: Anchors, c: Ctx) => void;
 /** One attachment: its slot (used when the module table does not know the id yet), the builder, and the inputs its look depends on. */
-export interface Attach { slot: Slot; build: Build; usesBalls?: boolean; color: number }
+export interface Attach {
+  slot: Slot; build: Build; usesBalls?: boolean; color: number;
+  /** Slots with two mounts (n = 2): the build is shifted sideways so mount 0 sits at +half and mount 1 at -half. `x` is the builder's own centre; `pin` fixes the side (the pump's spout only works to starboard, so the other mount takes the opposite side); with one mount nothing moves. Builders that already place by idx omit this. */
+  lane?: { x: number; half: number; pin?: 1 | -1 };
+}

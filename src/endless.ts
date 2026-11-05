@@ -18,7 +18,7 @@ let pendingBoss = false;
 export function beginEndless(): void {
   resetEndless();
   END.on = true; pendingBoss = false;
-  runCount('win'); bump('wins'); checkSeaQuests(); // the sea counts as won the moment the act-4 boss falls
+  runCount('win'); runCount('winT', G.time); bump('wins'); checkSeaQuests(); // the sea counts as won the moment the act-4 boss falls
 }
 export function endlessStep(): void {
   END.step++; END.t = 0; END.dbl += endReward(END.step);

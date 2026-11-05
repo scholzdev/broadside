@@ -14,6 +14,10 @@ import { EN_MODS3 } from './en-mods3';
 import { EN_EVO } from './en-evo';
 import { EN_SLOTS } from './en-slots';
 import { EN_TOUCH } from './en-touch';
+import { EN_ACH } from './en-ach';
+import { EN_DAILY } from './en-daily';
+import { EN_CODEX } from './en-codex';
+import { EN_SHIPS } from './en-ships';
 // English UI strings (keys are stable ids; {name} placeholders are filled by t()). Content tables keep their English text in their data files.
 export const EN: Record<string, string> = {
   // title / pause / help
@@ -49,6 +53,8 @@ export const EN: Record<string, string> = {
   // unlocks
   'un.title': 'Unlocks', 'un.sec.0': 'Ships', 'un.sec.1': 'Captains', 'un.sec.2': 'Crew', 'un.sec.3': 'Modules', 'un.sec.4': 'Relics',
   'un.kind.0': 'Ship', 'un.kind.1': 'Captain', 'un.kind.2': 'Crew', 'un.kind.3': 'Module', 'un.kind.4': 'Relic',
+  'end.chests': 'Boss chests', 'chest.got': '+{n} doubloons',
+  'un.sec.5': 'Ship upgrades', 'un.kind.5': 'Ship upgrade', 'un.upBlurb': 'A level-up and shop card for your ship. Toggle it off to never be offered it.',
   'un.cnt': '<b>{n} / {t}</b> unlocked', 'un.groupCnt': '{n} / {t} unlocked', 'un.logbook': 'Logbook', 'un.lifetime': 'Lifetime stats', 'un.lifetimeS': 'lifetime stats',
   'un.openLog': 'Open the Logbook', 'un.hint': 'Up / Down or Tab: section &middot; Left / Right: item &middot; Enter: buy / toggle pool &middot; Esc: back',
   'un.locked': 'Locked', 'un.unlocked': '&#10003; Unlocked', 'un.starting': '&#9733; Starting item', 'un.pool': 'In pool: {v}',
@@ -88,7 +94,7 @@ export const EN: Record<string, string> = {
   'end.unlocked': 'Unlocked: {list}!', 'end.again': 'Sail again', 'end.menu': 'Main menu',
   // settings
   'menu.settings': 'Settings', 'set.title': 'Settings', 'set.g.general': 'General', 'set.g.audio': 'Audio', 'set.g.gfx': 'Graphics', 'set.g.controls': 'Controls', 'set.g.data': 'Data',
-  'set.shake': 'Screen shake: {v}', 'shake.off': 'Off', 'shake.low': 'Low', 'shake.normal': 'Normal', 'set.nums': 'Damage numbers: {v}', 'set.arcs': 'Firing arcs: {v}',
+  'set.shake': 'Screen shake: {v}', 'shake.off': 'Off', 'shake.low': 'Low', 'shake.normal': 'Normal', 'set.steer': 'Steering: {v}', 'steer.stick': 'Stick direction', 'steer.tank': 'Tank', 'set.nums': 'Damage numbers: {v}', 'set.arcs': 'Firing arcs: {v}',
   'set.reset': 'Reset progress', 'set.resetSure': 'Really reset? Press again', 'set.resetDone': 'Progress reset', 'set.resetNote': 'Deletes doubloons, unlocks, stats and your saved loadout.',
   'set.hint': 'Up / Down: select &middot; Left / Right or Enter: change &middot; Esc: back',
   'ctl.move': 'Accelerate / brake', 'ctl.steer': 'Steer', 'ctl.boost': 'Boost (nitro)', 'ctl.cards': 'Pick card / reroll',
@@ -97,4 +103,4 @@ export const EN: Record<string, string> = {
   'pop.pumped': 'Pumped!', 'pop.surgeon': 'Surgeon!', 'pop.secondWind': 'Second Wind!', 'pop.bigBlast': 'BIG BLAST!',
   'pop.gold15': '+15 gold', 'pop.grog': 'Grog! +25 HP', 'pop.bribed': 'Bribed!',
 };
-Object.assign(EN, EN_CARDFMT, EN_INV, EN_LOOT, EN_QUESTS, EN_SEAS, EN_ENEMIES, EN_BOSSES, EN_CREW, EN_HEAT, EN_MUSIC, EN_TUT, EN_MODS3, EN_COSMETICS, EN_EVO, EN_SLOTS, EN_TOUCH);
+Object.assign(EN, EN_CARDFMT, EN_INV, EN_LOOT, EN_QUESTS, EN_SEAS, EN_ENEMIES, EN_BOSSES, EN_CREW, EN_HEAT, EN_MUSIC, EN_TUT, EN_MODS3, EN_COSMETICS, EN_EVO, EN_SLOTS, EN_TOUCH, EN_SHIPS, EN_CODEX, EN_ACH, EN_DAILY);

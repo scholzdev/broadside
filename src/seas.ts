@@ -112,9 +112,9 @@ export const isSea = (v: unknown): v is number => typeof v === 'number' && Numbe
 export const seaBoss = (sea: number, act: number): BossId => SEAS[sea].bosses[Math.max(0, Math.min(3, act - 1))];
 
 /** Weighted pick from the sea's pool for this act at act time `t`. */
-export function pickEnemy(sea: number, act: number, t: number): EnemyType {
+export function pickEnemy(sea: number, act: number, t: number, rand: () => number = Math.random): EnemyType {
   const rows = SEAS[sea].pools[Math.max(0, Math.min(3, act - 1))];
-  let r = Math.random() * rows.reduce((s, x) => s + (t >= x[2] ? x[1] : 0), 0);
+  let r = rand() * rows.reduce((s, x) => s + (t >= x[2] ? x[1] : 0), 0);
   return (rows.find(x => t >= x[2] && (r -= x[1]) < 0) ?? rows[0])[0];
 }
 /** Enemy types that can appear anywhere in this sea (map preview). */

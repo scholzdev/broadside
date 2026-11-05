@@ -41,7 +41,7 @@ function poll(now: number): void {
   requestAnimationFrame(poll);
   const gp = find();
   if (!gp) {
-    if (pad.connected) { pad.connected = false; pad.id = ''; padIn.turn = 0; padIn.fwd = padIn.back = padIn.boost = false; if (pad.lastInput === 'gamepad') setLastInput('keyboard'); }
+    if (pad.connected) { pad.connected = false; pad.id = ''; padIn.turn = 0; padIn.fwd = padIn.back = padIn.boost = false; padIn.aimX = padIn.aimY = padIn.mag = 0; if (pad.lastInput === 'gamepad') setLastInput('keyboard'); }
     return;
   }
   if (!pad.connected) { pad.connected = true; pad.id = gp.id; prev = []; }
@@ -53,14 +53,15 @@ function poll(now: number): void {
   if (anyBtn || lx || ly || rx || ry) setLastInput('gamepad');
   const st = G.state;
   if (st === 'playing') {
-    padIn.turn = -lx; padIn.fwd = ly < -0.3; padIn.back = ly > 0.3;
+    padIn.aimX = lx; padIn.aimY = -ly; padIn.mag = Math.min(1, Math.hypot(lx, ly));
+    if (S.steer === 'stick') { padIn.turn = 0; padIn.fwd = padIn.back = false; } else { padIn.turn = -lx; padIn.fwd = ly < -0.3; padIn.back = ly > 0.3; }
     padIn.boost = down(B.RT) || (gp.buttons[B.RT]?.value ?? 0) > 0.4 || down(B.A);
     if (edge(B.LB)) pushTap('KeyQ'); // slot abilities: only while sailing, so menu / card LB, RB and Y keep their meaning
     if (edge(B.RB)) pushTap('KeyE');
     if (edge(B.Y)) pushTap('KeyR');
     if (edge(B.START)) pushTap('KeyP');
   } else {
-    padIn.turn = 0; padIn.fwd = padIn.back = padIn.boost = false;
+    padIn.turn = 0; padIn.fwd = padIn.back = padIn.boost = false; padIn.aimX = padIn.aimY = padIn.mag = 0;
     if (st === 'levelup' || st === 'loot') padPickStep(navDir(gp, down, now), edge(B.A), edge(B.Y), edge(B.B));
     else if (st === 'dead' || st === 'won') {
       if (edge(B.A)) document.getElementById('again')?.click();

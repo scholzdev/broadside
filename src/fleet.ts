@@ -3,7 +3,7 @@ import type { BossId, MonsterBossId } from './seas';
 
 // ---- ship looks. Player ships keep the 6.4 x 2.4 galleon footprint unless their gameplay constants change too. ----
 
-export type PlayerShipId = 'sloop' | 'galleon' | 'frigate';
+export type PlayerShipId = 'sloop' | 'brigantine' | 'galleon' | 'xebec' | 'frigate';
 export const PLAYER_SHIPS: Record<PlayerShipId, ShipOpts> = {
   /** Small and quick: two masts (square fore, gaff main), white hull with blue trim. */
   sloop: {
@@ -11,11 +11,23 @@ export const PLAYER_SHIPS: Record<PlayerShipId, ShipOpts> = {
     bottom: 0x2b4f7a, inner: 0x2f6db5, masts: [0.9, -0.8], rigs: ['square', 'gaff'], tiers: [2, 1], guns: 2, castle: 0.3, forecastle: 0,
     flag: 0x1d2a3a, emblem: 'skull',
   },
+  /** Fast striker: two masts (square fore, gaff main), teal hull with a cream band, sharp low castle. */
+  brigantine: {
+    scale: 1, length: 6.0, beam: 2.2, hull: 0x2f5a5c, deck: 0xa88a5a, sail: 0xf2ead2, trim: 0xe3d3a0, accent: 0xd8b24a,
+    bottom: 0x1f3a3c, inner: 0x3f7a78, masts: [1.1, -0.8], rigs: ['square', 'gaff'], tiers: [2, 1], guns: 3, castle: 0.35, forecastle: 0.12,
+    flag: 0xe3d3a0, emblem: 'cross', lanterns: 0xffb04a,
+  },
   /** The starting ship: warm brown hull, gold carvings, tall stern castle, red skull flag. */
   galleon: {
     scale: 1, hull: 0x7a4626, deck: 0xa47a48, sail: 0xf6ecd4, trim: 0x2a1a0e, accent: 0xc99a3c, bottom: 0x6a2c1f,
     masts: [1.5, -0.2, -1.7], rigs: ['square', 'square', 'lateen'], tiers: [2, 3, 1], guns: 3, castle: 0.75, forecastle: 0.3,
     flag: 0xc0392b, emblem: 'skull', lanterns: 0xffb04a,
+  },
+  /** Mediterranean corsair: three lateen sails on a long, low hull, ochre with a crimson band and striped sails. */
+  xebec: {
+    scale: 1, length: 7.0, beam: 2.3, hull: 0xb98a4a, deck: 0x9c7a4c, sail: 0xf0e4c4, sailStripe: 0xb8452e, trim: 0x8a2e24, accent: 0xd8a24a,
+    bottom: 0x5a3a22, inner: 0x8a2e24, masts: [2.0, 0.1, -1.9], rigs: ['lateen', 'lateen', 'lateen'], tiers: 1, mastH: [4.3, 5.0, 3.8], guns: 4, castle: 0.3, forecastle: 0.05,
+    flag: 0x8a2e24, emblem: 'crown', lanterns: 0xffb04a,
   },
   /** Larger and long: three square-rigged masts, dark hull with a red gun band. */
   frigate: {

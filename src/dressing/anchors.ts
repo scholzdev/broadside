@@ -49,6 +49,10 @@ export class Anchors {
     if (n <= 1) return [0.32, 0.74];
     return idx === 0 ? [0.52, 0.78] : [0.29, 0.49];
   }
+  /** A second masthead for the deck's second mount: the tallest mast other than the main one (the main one when there is only one). */
+  altMast(): Mast {
+    return this.masts.reduce((a, m) => (m !== this.main && (a === this.main || m.top > a.top) ? m : a), this.main);
+  }
   /** Deck spot for a deck-slot module: between fore- and mainmast (on the hatch). */
   deckSpot(): number {
     const m = this.masts;

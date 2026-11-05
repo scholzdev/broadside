@@ -40,6 +40,7 @@ setCam(YAW, PITCH);
 const camTarget = new THREE.Vector3();
 initRender(canvas, camera);
 
+let bossMul = 1; // eases to 1.3 while a boss fight is on
 let viewMul = 1; // eases toward the stage framing on the loadout screen
 function resize(): void {
   resizeRender();
@@ -47,7 +48,7 @@ function resize(): void {
 }
 function project(): void {
   const a = innerWidth / innerHeight;
-  const vh = (VIEW_H * input.zoom * viewMul) / 2;
+  const vh = (VIEW_H * input.zoom * viewMul * bossMul) / 2;
   camera.left = -vh * a; camera.right = vh * a; camera.top = vh; camera.bottom = -vh;
   camera.updateProjectionMatrix();
   setShadowExtent(vh * a, vh, curPitch);
@@ -106,6 +107,13 @@ function frame(now: number): void {
     // ease into the stage framing, then follow the smoothed stage zoom 1:1
     viewMul += (wantMul - viewMul) * Math.min(1, 1 - Math.exp(-(framed && framedT > 0.8 ? 60 : 5) * dt));
     if (Math.abs(viewMul - wantMul) < 1e-4) viewMul = wantMul;
+    project();
+  }
+
+  const wantBoss = G.state !== 'menu' && G.boss && !G.boss.dead ? 1.3 : 1;
+  if (bossMul !== wantBoss) {
+    bossMul += (wantBoss - bossMul) * Math.min(1, 1 - Math.exp(-2.5 * dt)); // ~1.2 s to settle
+    if (Math.abs(bossMul - wantBoss) < 1e-3) bossMul = wantBoss;
     project();
   }
 

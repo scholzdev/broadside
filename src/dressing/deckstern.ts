@@ -22,7 +22,7 @@ export const mortar: Build = (b, a) => {
 
 /** Sea Witch: a brass lightning rod above the mainmast head with a pulsing violet crystal. */
 export const witch: Build = (b, a, c) => {
-  const m = a.main, y = m.top;
+  const m = c.idx ? a.altMast() : a.main, y = m.top;
   rod(b, [0, y - 0.1, m.z], [0, y + 0.92, m.z], 0.022, C.brass, 5);
   for (const k of [0.45, 0.58]) prim(b, 'torus', C.brass, [0, y + k, m.z], 0.07, [Math.PI / 2, 0, 0]);
   for (const s of [1, -1]) rod(b, [0, y + 0.66, m.z], [s * 0.1, y + 0.76, m.z], 0.012, C.brass, 3);
@@ -37,7 +37,7 @@ export const witch: Build = (b, a, c) => {
 
 /** Crow's nest: an open tub at the mainmast head with a module-coloured pennant. */
 export const crowsnest: Build = (b, a, c) => {
-  const m = a.main, y = m.top - 0.05;
+  const m = c.idx ? a.altMast() : a.main, y = m.top - 0.05;
   cyl(b, C.plank, [0, y + 0.14, m.z], 0.32, 0.28, undefined, 10);
   cyl(b, shade(C.plank, 0.55), [0, y + 0.285, m.z], 0.27, 0.01, undefined, 10);
   prim(b, 'torus', C.dark, [0, y + 0.28, m.z], 0.32, [Math.PI / 2, 0, 0]);
@@ -98,7 +98,7 @@ export const lantern: Build = (b, a, c) => {
 
 /** Net drum: a spool of net between two posts on the transom, a curtain of net with cork floats hanging over the stern. */
 export const net: Build = (b, a, c) => {
-  const zt = -a.L / 2 + 0.12, ty = a.top(0.02), hy = ty + 0.36, w = Math.min(0.8, a.railX(0.02) * 1.1);
+  const zt = -a.L / 2 + 0.12, ty = a.top(0.02), hy = ty + 0.36, w = Math.min(0.8, a.railX(0.02) * 1.1) * (c.n > 1 ? 0.6 : 1);
   for (const s of [1, -1]) box(b, C.wood, [s * (w / 2 + 0.06), ty + 0.2, zt], [0.08, 0.4, 0.12]);
   cyl(b, 0x4e5a3a, [0, hy, zt], 0.15, w, [0, 0, Math.PI / 2], 10);
   for (const s of [1, -1]) cyl(b, C.dark, [s * w / 2, hy, zt], 0.2, 0.04, [0, 0, Math.PI / 2], 10);

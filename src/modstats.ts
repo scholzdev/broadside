@@ -107,7 +107,7 @@ Object.assign(TRACKS, TRACKS3);
 // Balance pass: every upgrade card is a clearly visible jump. Damage steps are big (a share of the BASE seed, so linear not compounding), ability
 // track steeper than the auto track; cooldown steps are x2.25; other additive/absolute-positive steps x1.8. Specs are shared consts, so clone.
 const isDmg = (s: Spec): boolean => s.kind === 'add' && (s.key === 'dmg' || s.key === 'bossDmg');
-export const DMG_STEP = { auto: 1.0, ability: 1.0 }; // linear: + base * step * mag per damage card
+export const DMG_STEP = { auto: 1.4, ability: 1.0 }; // linear: + base * step * mag per damage card
 for (const def of Object.values(TRACKS)) {
   for (const tr of ['auto', 'ability'] as Track[]) {
     const k = DMG_STEP[tr], rescale = (s: Spec): Spec => isDmg(s) ? { ...s, step: k } : s.kind === 'cd' ? { ...s, step: s.step * 2.25 } : s.kind === 'cnt' || s.step < 0 ? s : { ...s, step: s.step * 1.8 };

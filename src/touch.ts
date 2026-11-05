@@ -1,5 +1,6 @@
 import { G } from './game';
 import { touchIn, pushTap } from './input';
+import { S } from './settings';
 import { SLOT_KEYS, activeCdMax } from './abilities';
 import { ICON } from './icons';
 import { t, onLang } from './i18n';
@@ -20,9 +21,10 @@ function stick(e: PointerEvent): void {
   knob.style.transform = `translate(${dx}px,${dy}px)`;
   const dz = (v: number): number => (Math.abs(v) < DEAD ? 0 : (v - Math.sign(v) * DEAD) / (1 - DEAD));
   const lx = dz(dx / R), ly = dy / R;
-  touchIn.turn = -lx; touchIn.fwd = ly < -0.3; touchIn.back = ly > 0.3;
+  touchIn.aimX = lx; touchIn.aimY = -ly; touchIn.mag = Math.min(1, Math.hypot(lx, ly));
+  if (S.steer === 'stick') { touchIn.turn = 0; touchIn.fwd = touchIn.back = false; } else { touchIn.turn = -lx; touchIn.fwd = ly < -0.3; touchIn.back = ly > 0.3; }
 }
-function endStick(): void { sid = -1; touchIn.turn = 0; touchIn.fwd = touchIn.back = false; base.classList.remove('on'); knob.style.transform = ''; }
+function endStick(): void { sid = -1; touchIn.turn = 0; touchIn.fwd = touchIn.back = false; touchIn.aimX = touchIn.aimY = touchIn.mag = 0; base.classList.remove('on'); knob.style.transform = ''; }
 
 function build(): void {
   if (zone) return;

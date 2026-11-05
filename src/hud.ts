@@ -3,6 +3,9 @@ import { buyCard } from './loot';
 import { ACTS } from './content';
 import { cardHtml, buyHtml } from './cardview';
 import { ICON } from './icons';
+import { DAILY } from './daily';
+import { dailyTag, dailyBestText } from './dailyui';
+import { loadDaily } from './dailyrun';
 import { t, onLang } from './i18n';
 import { relicName, bossName, unlockName as unlName } from './lname';
 import { wind } from './world';
@@ -82,6 +85,7 @@ export function showBuy(): void {
 }
 export function hideCards(): void { el.cards.style.display = 'none'; }
 
+const dailyBestLine = (): string => { const b = loadDaily().best; return b ? t('daily.endBest', { best: dailyBestText(b) }) : ''; };
 export function showEnd(won: boolean, r: RunResult | null): void {
   const tt = Math.floor(G.time), mm = Math.floor(tt / 60), ss = String(tt % 60).padStart(2, '0');
   el.end.innerHTML = `<div class="box"><h1>${t(won ? 'end.victory' : 'end.sunk')}</h1>
@@ -92,10 +96,11 @@ export function showEnd(won: boolean, r: RunResult | null): void {
     ${r && r.endN ? `<p class="endn">&infin; ${t('end.endless', { n: r.endN, d: r.endD })}</p>` : ''}
     ${L.relic ? `<p>${t('end.relic', { name: relicName(L.relic) })}</p>` : ''}
     ${r ? `<div class="dbreak"><div><span>${t('end.gold', { n: r.gold })}</span><b>${r.goldD}</b></div><div><span>${t('end.bosses', { n: r.bosses })}</span><b>${r.bossD}</b></div>
-      <div><span>${t('end.acts', { n: r.acts })}</span><b>${r.actD}</b></div><div><span>${t('end.kills', { n: r.kills })}</span><b>${r.killD}</b></div>${r.questN ? `<div><span>${t('end.quests', { n: r.questN })}</span><b>${r.questD}</b></div>` : ''}
+      <div><span>${t('end.acts', { n: r.acts })}</span><b>${r.actD}</b></div><div><span>${t('end.kills', { n: r.kills })}</span><b>${r.killD}</b></div>${r.chestD ? `<div><span>${t('end.chests')}</span><b>${r.chestD}</b></div>` : ''}${r.questN ? `<div><span>${t('end.quests', { n: r.questN })}</span><b>${r.questD}</b></div>` : ''}
       <div class="tot"><span>${t('end.earned')}</span><b>+${r.total} ${DBL}</b></div><div><span>${t('doubloons')}</span><b>${r.balance} ${DBL}</b></div></div>
       ${r.quests.map(q => `<div class="sqd"><span>${t('end.quest', { name: questText(SEAS[G.sea].quests.find(x => x.id === q.id) ?? SEAS[G.sea].quests[0]) })}</span><b>+${q.reward} ${DBL}</b></div>`).join('')}
       ${r.unlocked.length ? `<p class="unl">${t('end.unlocked', { list: r.unlocked.map(unlName).join(', ') })}</p>` : ''}` : ''}
+    ${DAILY ? `<p class="dbestl">${dailyBestLine()}</p>` : ''}
     <div class="btns"><button id="again">${t('end.again')}</button><button id="toMenu">${t('end.menu')}</button></div></div>`;
   el.end.style.display = 'flex';
 }
@@ -124,7 +129,7 @@ export function updateHud(): void {
   else if (END.on) bh = act;
   else if (G.bossSpawned) bh = `<b>${t('hud.bossDown')}</b>${act}`;
   else bh = `${ICON.skull}<b class="tm${G.bossTimer <= 30 ? ' soon' : ''}">${mmss(G.bossTimer)}</b><small>${t('hud.act', { a: G.act, n: ACTS })} &middot; ${bn}</small>`;
-  bh += endlessLabel();
+  bh += endlessLabel() + (DAILY ? `<small class="dtag">${dailyTag()}</small>` : '');
   if (bh !== bossHtml) { bossHtml = bh; el.bossT.innerHTML = bh; }
   el.bossBarWrap.style.display = G.boss ? 'block' : 'none';
   el.bossBarWrap.classList.toggle('sub', !!G.boss?.hidden);

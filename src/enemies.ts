@@ -17,8 +17,10 @@ import { smoke, splinters, explosion, embers, flame } from './particles';
 import { addTrauma, addHitstop, hitNumber } from './juice';
 import { seaPose, Pose } from './anim';
 import { play } from './audio';
+import { bossChest, dropRepairKit } from './edibles';
 import { L } from './loadout';
 import { bump, runCount } from './meta';
+import { rngFor, nextN } from './daily';
 import { SEAS, BOSS_IDS, seaBoss, pickEnemy, BossId } from './seas';
 import { maybeElite, heatDeath, heatBoss } from './heat';
 import { endHp, endDmg, endDensity, EliteTrait, END, HEAT } from './heatdefs';
@@ -133,7 +135,8 @@ export function damageEnemy(e: Enemy, n: number, flash = true, source: DmgSource
   if (e.def.xp > 0) spawnOrb(e.x, e.z, e.def.xp);
   addGold(ENEMY_GOLD[e.type]);
   heatDeath(e);
-  if (e.bd) { G.boss = null; addTrauma(1); addHitstop(0.12); bossDied(e); bossDown(e.bd.id); }
+  if (e.bd) { G.boss = null; addTrauma(1); addHitstop(0.12); bossDied(e); bossChest(e.x, e.z); bossDown(e.bd.id); }
+  else dropRepairKit(e.x, e.z);
 }
 
 export function steer(e: Enemy, tx: number, tz: number, rate: number, dt: number): void {
@@ -222,12 +225,12 @@ function stepSpawner(dt: number): void {
   const cap = Math.round((ALIVE_CAP[ai] + (END.on ? 2 * END.step : 0) + 3 * HEAT.level) * (G.boss ? 0.6 : 1));
   if (G.enemies.length >= cap) return;
   const n = 1 + Math.min(ai >= 2 ? 2 : 1, Math.floor(t / 70));
-  const a = Math.random() * Math.PI * 2;
+  const rand = rngFor('spawn', nextN('spawn')), a = rand() * Math.PI * 2;
   for (let i = 0; i < n; i++) {
-    const type = pickEnemy(G.sea, G.act, t);
+    const type = pickEnemy(G.sea, G.act, t, rand);
     if (type === 'battery') { spawnBattery(); continue; }
     for (let tries = 0; tries < 6; tries++) {
-      const aa = a + (Math.random() - 0.5) * 0.5, dist = 50 + Math.random() * 10;
+      const aa = a + (rand() - 0.5) * 0.5, dist = 50 + rand() * 10;
       const x = G.player.x + Math.sin(aa) * dist, z = G.player.z + Math.cos(aa) * dist;
       if (!nearIsland(x, z, 3)) { if (type === 'swarm') spawnPack(x, z); else spawnEnemy(type, x, z); break; }
     }

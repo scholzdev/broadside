@@ -1,7 +1,7 @@
 // Ship and captain definitions plus the current loadout. Dependency-free so content.ts (deriveStats) can read it.
 import { MODS, MOD_IDS, ModuleId, Slot } from './modules';
 import { RelicId, CrewId, isRelicId, isCrewId } from './relics';
-export type ShipId = 'sloop' | 'galleon' | 'frigate';
+export type ShipId = 'sloop' | 'brigantine' | 'galleon' | 'xebec' | 'frigate';
 import { CAPTAINS, CAP0, CaptainId } from './roster';
 import { isUnlocked, modInPool, seaOpen, heatUnlocked } from './meta';
 import { isSea } from './seas';
@@ -11,7 +11,9 @@ export type { CaptainId, CaptainDef } from './roster';
 export interface ShipDef { id: ShipId; name: string; blurb: string; hp: number; speed: number; turn: number; balls: number; ram: number; start: ModuleId[]; slots: Record<Slot, number>; length: number; beam: number }
 export const SHIPS: Record<ShipId, ShipDef> = {
   sloop: { id: 'sloop', name: 'Sloop', blurb: 'Small and quick. Starts with a Bow Chaser.', hp: 70, speed: 11, turn: 1.3, balls: 1, ram: 1, start: ['broadside', 'chaser'], slots: { bow: 1, side: 1, deck: 0, stern: 1 }, length: 5.2, beam: 2.0 },
+  brigantine: { id: 'brigantine', name: 'Brigantine', blurb: 'Fast striker with two bow mounts. Starts with a Bow Chaser.', hp: 85, speed: 10, turn: 1.15, balls: 2, ram: 1.2, start: ['chaser', 'broadside'], slots: { bow: 2, side: 1, deck: 0, stern: 1 }, length: 6.0, beam: 2.2 },
   galleon: { id: 'galleon', name: 'Galleon', blurb: 'Balanced all-rounder.', hp: 100, speed: 9, turn: 1, balls: 2, ram: 1, start: ['broadside'], slots: { bow: 1, side: 1, deck: 1, stern: 1 }, length: 6.4, beam: 2.4 },
+  xebec: { id: 'xebec', name: 'Xebec', blurb: 'Lateen-rigged corsair with a crowded deck and a double stern.', hp: 110, speed: 8.5, turn: 0.95, balls: 2, ram: 1, start: ['broadside'], slots: { bow: 1, side: 1, deck: 2, stern: 2 }, length: 7.0, beam: 2.3 },
   frigate: { id: 'frigate', name: 'Frigate', blurb: 'Heavy and slow. Rams hit 50% harder.', hp: 150, speed: 7.5, turn: 0.8, balls: 3, ram: 1.5, start: ['broadside'], slots: { bow: 1, side: 2, deck: 1, stern: 1 }, length: 7.6, beam: 2.5 },
 };
 

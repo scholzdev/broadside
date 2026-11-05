@@ -1,9 +1,10 @@
 import { deriveStats, Levels, MAX_LV, Stats } from './content';
 import { shipView } from './cardfmt';
-import { modInPool } from './meta';
+import { modInPool, upInPool } from './meta';
 import { L } from './loadout';
 import { MODS, MOD_IDS, ModuleId, Slot, MAX_MOD_LV, PLUS_LV, SLOT_KEY } from './modules';
 import { t } from './i18n';
+import { cardRand } from './daily';
 import { modName, modInfo, modActive, slotName, statLabel } from './lname';
 import type { CrewId } from './relics';
 import { crewCandidates } from './crewcards';
@@ -28,7 +29,7 @@ export interface Card {
 }
 export interface Ctx { lv: Levels; ms: StatMap; free: Record<Slot, number>; rareUp?: boolean; loot?: boolean }
 
-const rand = (): number => Math.random();
+const rand = cardRand;
 /** `rareUp` (Golden Compass) rolls only Rare and Epic. */
 export function pickRarity(rareUp = false): Rarity {
   const ks = (Object.keys(RARITIES) as Rarity[]).slice(rareUp ? 2 : 0);
@@ -78,7 +79,7 @@ function candidates(ctx: Ctx): Cand[] {
   const { lv } = ctx, a: Stats = deriveStats(lv, ctx.ms);
   const up = (id: string, max = MAX_LV, w = 0.22): void => {
     const n = lv[id] ?? 0;
-    if (n >= max) return;
+    if (n >= max || !upInPool(id)) return;
     const b = deriveStats({ ...lv, [id]: n + 1 }, ctx.ms), ttl = `${upName(id)} (${n + 1}/${max})`, v = shipView(id, a, b);
     out.push({ w, make: () => ({ id, kind: 'ship', ref: id, title: ttl, lines: v.lines, notes: v.notes, text: [...v.lines.map(fmt), ...v.notes].join('; ') }) });
   };

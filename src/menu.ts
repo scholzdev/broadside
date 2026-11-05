@@ -1,4 +1,4 @@
-import { G, startRun, togglePause, restartRun, toMainMenu, retireEndless, QUICK } from './game';
+import { G, startRun, togglePause, restartRun, toMainMenu, retireEndless, QUICK, FAST } from './game';
 import { pad } from './input';
 import { END } from './heatdefs';
 import { L, setLoadout, loadSaved } from './loadout';
@@ -15,8 +15,12 @@ import { openMap, mapTap, mapClick, mapHover } from './mapui';
 import { applySea } from './seatheme';
 import { startTutorial } from './tutorial';
 import { S } from './settings';
+import { recordsHtml, recordsScroll } from './recordsui';
+import { checkAchievements } from './achievements';
+import { DAILY } from './daily';
+import { dailyHtml } from './dailyui';
 
-type Screen = 'title' | 'map' | 'loadout' | 'help' | 'pause' | 'unlocks' | 'settings';
+type Screen = 'title' | 'map' | 'loadout' | 'help' | 'pause' | 'unlocks' | 'settings' | 'records' | 'daily';
 let screen: Screen = 'title', idx = 0, settingsFrom: Screen = 'title';
 let root: HTMLElement;
 
@@ -26,7 +30,11 @@ const btn = (i: number, act: string, text: string, v = '', cls = ''): string => 
 function html(): string {
   switch (screen) {
     case 'title':
-      return `<div class="mbox title"><h1>Broadside</h1><button class="sndbtn" data-act="snd">${sndLabel()}</button><p class="sub">${t('title.sub')}</p><div class="dbal">${DBL} <b>${M.doubloons}</b> ${t('doubloons')}</div><div class="mbtns">${btn(0, 'sail', t('menu.sail'))}${btn(1, 'unlocks', t('menu.unlocks'))}${btn(2, 'help', t('menu.help'))}${btn(3, 'settings', t('menu.settings'))}</div></div>`;
+      return `<div class="mbox title"><h1>Broadside</h1><button class="sndbtn" data-act="snd">${sndLabel()}</button><p class="sub">${t('title.sub')}</p><div class="dbal">${DBL} <b>${M.doubloons}</b> ${t('doubloons')}</div><div class="mbtns">${btn(0, 'sail', t('menu.sail'))}${btn(1, 'unlocks', t('menu.unlocks'))}${btn(2, 'help', t('menu.help'))}${btn(3, 'settings', t('menu.settings'))}${btn(4, 'records', t('menu.records'))}${btn(5, 'daily', t('menu.daily'))}</div></div>`;
+    case 'daily':
+      return dailyHtml();
+    case 'records':
+      return recordsHtml();
     case 'settings':
       return settingsHtml();
     case 'unlocks':
@@ -75,11 +83,14 @@ function act(a: string, v: string): void {
     case 'help': go('help'); break;
     case 'snd': unmuteToggle(); break;
     case 'unlocks': go('unlocks'); break;
+    case 'records': go('records'); break;
+    case 'daily': go('daily'); break;
+    case 'dailygo': location.href = location.pathname + '?' + [FAST ? 'fast' : '', 'daily'].filter(Boolean).join('&'); break;
     case 'settings': openSettings(); break;
     case 'back': back(); break;
     case 'resume': togglePause(); break;
     case 'tutorial': startTutorial(); break;
-    case 'lang': case 'padvib': case 'sound': case 'gfx': case 'shake': case 'nums': case 'arcs': case 'abil': case 'reset': setAct(a); break;
+    case 'lang': case 'steer': case 'padvib': case 'sound': case 'gfx': case 'shake': case 'nums': case 'arcs': case 'abil': case 'reset': setAct(a); break;
     case 'retire': retireEndless(); break;
     case 'restart': restartRun(); break;
     case 'menu': toMainMenu(); break;
@@ -87,13 +98,17 @@ function act(a: string, v: string): void {
 }
 function back(): void {
   if (screen === 'settings') { settingsLeave(); screen = settingsFrom; render(); idx = G.state === 'menu' ? 3 : 1; mark(); return; }
-  if (screen === 'loadout') go('map');
-  else if (screen === 'map' || screen === 'help' || screen === 'unlocks') go('title');
+  if (screen === 'records') go('title', 4);
+  else if (screen === 'daily') go('title', 5);
+  else if (screen === 'loadout') go('map');
+  else if (screen === 'unlocks') go('title', 1);
+  else if (screen === 'help') go('title', 2);
+  else if (screen === 'map') go('title');
 }
 function openSettings(): void { settingsFrom = screen; go('settings'); }
 /** Esc / P while paused on the settings screen goes back instead of resuming. Returns true when consumed. */
 export function menuBack(): boolean { if (screen !== 'settings') return false; back(); return true; }
-const SETTING_ACTS = ['lang', 'gfx', 'shake', 'nums', 'arcs', 'abil', 'sound', 'padvib'];
+const SETTING_ACTS = ['lang', 'gfx', 'shake', 'nums', 'arcs', 'abil', 'sound', 'padvib', 'steer'];
 function adjustVol(d: number): void {
   const r = root.querySelector<HTMLInputElement>('.sel input[type=range]');
   if (r) adjustVolume(r, d);
@@ -106,7 +121,8 @@ export function menuTap(code: string): void {
   if (screen === 'loadout') { if (loadoutTap(code) === 'back' && G.state === 'menu') back(); return; }
   if (screen === 'unlocks') { if (unlocksTap(code) === 'back' && G.state === 'menu') back(); return; }
   if (screen === 'map') { const r = mapTap(code); if (r === 'back') back(); else if (r === 'go') go('loadout'); return; }
-  const vertical = screen === 'title' || screen === 'pause' || screen === 'help' || screen === 'settings';
+  if (screen === 'records' && recordsScroll(root, code)) return;
+  const vertical = screen === 'title' || screen === 'daily' || screen === 'pause' || screen === 'help' || screen === 'settings' || screen === 'records';
   const prev = code === 'ArrowLeft' || code === 'ArrowUp' || code === 'KeyA' || code === 'KeyW';
   const next = code === 'ArrowRight' || code === 'ArrowDown' || code === 'KeyD' || code === 'KeyS';
   const cur = root.querySelector<HTMLElement>('.sel');
@@ -149,8 +165,9 @@ export function initMenu(): void {
   onLang(() => { if (root.style.display !== 'none') render(true); });
   addEventListener('resize', () => { if (screen === 'loadout') measureStage(); });
   setLoadout(s.ship, s.captain, s);
+  checkAchievements();
   initShip();
-  if (QUICK) startRun(s.ship, s.captain, s);
+  if (QUICK || DAILY) startRun(s.ship, s.captain, s);
   else if (M.stats.runs === 0 && !S.tutDone && !new URLSearchParams(location.search).has('notut')) startTutorial(); // first run: guided tutorial
   else { if (s.sea) applySea(s.sea); go('title'); } // the title and menus float over the chosen sea
 }

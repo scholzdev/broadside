@@ -7,6 +7,7 @@ import { makeReefMesh, setIslandStyle } from './islandstyle';
 import { SEAS } from './seas';
 import type { Pt } from './spatial';
 import { HEAT, heatAt, REEF_SIZE_K } from './heatdefs';
+import { DAILY, dailySeed } from './daily';
 
 export interface Hut { x: number; z: number; eaten: boolean; mesh: THREE.Object3D }
 /** `fort`: the Lighthouse Fortress collider (fortress.ts), never a battery site. */
@@ -39,7 +40,7 @@ function rng(seed: number): () => number {
 
 /** Islands and reefs of one cell. Calm Seas (sea 0) keeps the original seed and rand order, so its layout is unchanged. */
 function gen(cx: number, cz: number): Cell {
-  const seed = (cx * 73856093) ^ (cz * 19349663) ^ 0x9e3779b9 ^ Math.imul(sea, 0x5bd1e995);
+  const seed = (cx * 73856093) ^ (cz * 19349663) ^ 0x9e3779b9 ^ Math.imul(sea, 0x5bd1e995) ^ (DAILY ? dailySeed() : 0);
   const d = SEAS[sea].islands, cell: Cell = { isl: [], reefs: [], coral: [] };
   for (let k = 0; k < d.per; k++) {
     const rand = rng(seed + k * 7919);

@@ -16,6 +16,10 @@ import { DE_MODS3 } from './de-mods3';
 import { DE_EVO } from './de-evo';
 import { DE_SLOTS } from './de-slots';
 import { DE_TOUCH } from './de-touch';
+import { DE_CODEX } from './de-codex';
+import { DE_ACH } from './de-ach';
+import { DE_DAILY } from './de-daily';
+import { DE_SHIPS } from './de-ships';
 
 // German UI strings; content (ships, captains, spells, modules, relics, crew) is split into de-content.ts and de-mods.ts.
 const UI: Record<string, string> = {
@@ -49,6 +53,8 @@ const UI: Record<string, string> = {
   'lo.drag': 'Ziehen: drehen &middot; Scrollen: zoomen &middot; Rechts ziehen: verschieben', 'lo.reset': '&#8634; Ansicht zurücksetzen',
   'un.title': 'Freischaltungen', 'un.sec.0': 'Schiffe', 'un.sec.1': 'Kapitäne', 'un.sec.2': 'Crew', 'un.sec.3': 'Module', 'un.sec.4': 'Relikte',
   'un.kind.0': 'Schiff', 'un.kind.1': 'Kapitän', 'un.kind.2': 'Crew', 'un.kind.3': 'Modul', 'un.kind.4': 'Relikt',
+  'end.chests': 'Boss-Truhen', 'chest.got': '+{n} Dublonen',
+  'un.sec.5': 'Schiffs-Upgrades', 'un.kind.5': 'Schiffs-Upgrade', 'un.upBlurb': 'Eine Level-up- und Shop-Karte für dein Schiff. Schalte sie aus, damit sie nie mehr angeboten wird.',
   'un.cnt': '<b>{n} / {t}</b> freigeschaltet', 'un.groupCnt': '{n} / {t} freigeschaltet', 'un.logbook': 'Logbuch', 'un.lifetime': 'Gesamtstatistik', 'un.lifetimeS': 'Gesamtstatistik',
   'un.openLog': 'Logbuch öffnen', 'un.hint': 'Hoch / Runter oder Tab: Bereich &middot; Links / Rechts: Eintrag &middot; Enter: kaufen / Pool umschalten &middot; Esc: zurück',
   'un.locked': 'Gesperrt', 'un.unlocked': '&#10003; Freigeschaltet', 'un.starting': '&#9733; Startgegenstand', 'un.pool': 'Im Pool: {v}',
@@ -82,7 +88,7 @@ const UI: Record<string, string> = {
   'end.gold': 'Gold {n} / 2', 'end.bosses': 'Bosse {n} &times; 30', 'end.acts': 'Akte {n} &times; 10', 'end.kills': 'Abschüsse {n} / 10', 'end.earned': 'Verdient',
   'end.unlocked': 'Freigeschaltet: {list}!', 'end.again': 'Nochmal segeln', 'end.menu': 'Hauptmenü',
   'menu.settings': 'Einstellungen', 'set.title': 'Einstellungen', 'set.g.general': 'Allgemein', 'set.g.audio': 'Audio', 'set.g.gfx': 'Grafik', 'set.g.controls': 'Steuerung', 'set.g.data': 'Daten',
-  'set.shake': 'Bildschirmwackeln: {v}', 'shake.off': 'Aus', 'shake.low': 'Schwach', 'shake.normal': 'Normal', 'set.nums': 'Schadenszahlen: {v}', 'set.arcs': 'Feuerbereiche: {v}',
+  'set.shake': 'Bildschirmwackeln: {v}', 'shake.off': 'Aus', 'shake.low': 'Schwach', 'shake.normal': 'Normal', 'set.steer': 'Lenkung: {v}', 'steer.stick': 'Stick-Richtung', 'steer.tank': 'Drehen und Gas', 'set.nums': 'Schadenszahlen: {v}', 'set.arcs': 'Feuerbereiche: {v}',
   'set.reset': 'Fortschritt zurücksetzen', 'set.resetSure': 'Wirklich zurücksetzen? Nochmal drücken', 'set.resetDone': 'Fortschritt zurückgesetzt', 'set.resetNote': 'Löscht Dublonen, Freischaltungen, Statistik und die gespeicherte Ausrüstung.',
   'set.hint': 'Hoch / Runter: wählen &middot; Links / Rechts oder Enter: ändern &middot; Esc: zurück',
   'ctl.move': 'Beschleunigen / bremsen', 'ctl.steer': 'Steuern', 'ctl.boost': 'Turbo (Nitro)', 'ctl.cards': 'Karte wählen / neu würfeln',
@@ -90,4 +96,4 @@ const UI: Record<string, string> = {
   'pop.pumped': 'Gepumpt!', 'pop.surgeon': 'Feldscher!', 'pop.secondWind': 'Zweiter Atem!', 'pop.bigBlast': 'GROSSER KNALL!',
   'pop.gold15': '+15 Gold', 'pop.grog': 'Grog! +25 HP', 'pop.bribed': 'Bestochen!',
 };
-export const DE: Record<string, string> = { ...UI, ...DE_CONTENT, ...DE_MODS, ...DE_CARDFMT, ...DE_INV, ...DE_LOOT, ...DE_QUESTS, ...DE_SEAS, ...DE_ENEMIES, ...DE_BOSSES, ...DE_CREW, ...DE_HEAT, ...DE_MUSIC, ...DE_TUT, ...DE_MODS3, ...DE_COSMETICS, ...DE_EVO, ...DE_SLOTS, ...DE_TOUCH };
+export const DE: Record<string, string> = { ...UI, ...DE_CONTENT, ...DE_MODS, ...DE_CARDFMT, ...DE_INV, ...DE_LOOT, ...DE_QUESTS, ...DE_SEAS, ...DE_ENEMIES, ...DE_BOSSES, ...DE_CREW, ...DE_HEAT, ...DE_MUSIC, ...DE_TUT, ...DE_MODS3, ...DE_COSMETICS, ...DE_EVO, ...DE_SLOTS, ...DE_TOUCH, ...DE_SHIPS, ...DE_CODEX , ...DE_ACH, ...DE_DAILY };

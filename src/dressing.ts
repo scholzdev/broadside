@@ -125,6 +125,13 @@ function clear(): void {
   for (let i = root.children.length - 1; i >= 0; i--) root.remove(root.children[i]);
 }
 
+/** Sideways shift of a lane-placed attachment in a two-mount slot: mounts alternate +/- sides unless one is pinned to a side. */
+function laneShift(l: NonNullable<typeof ATTACH[string]['lane']>, m: Mount, mounts: readonly Mount[]): number {
+  const other = mounts.find(o => o !== m && o.slot === m.slot && ATTACH[o.id]?.lane?.pin);
+  const side = l.pin ?? (other ? -(ATTACH[other.id].lane!.pin as number) : m.idx % 2 ? -1 : 1);
+  return side * l.half - l.x;
+}
+
 function rebuild(mounts: readonly Mount[], balls: number): void {
   if (!a || !model) return;
   const an = a;
@@ -135,12 +142,14 @@ function rebuild(mounts: readonly Mount[], balls: number): void {
     const at = ATTACH[m.id];
     if (!at) continue;
     const slot = MODS[m.id as keyof typeof MODS]?.slot ?? at.slot, n = SHIPS[ship].slots[slot] ?? 1;
-    const k = `${ship}:${m.id}:${m.idx}:${n}:${at.usesBalls ? balls : 0}`;
+    const dx = n > 1 && at.lane ? laneShift(at.lane, m, mounts) : 0;
+    const k = `${ship}:${m.id}:${m.idx}:${n}:${at.usesBalls ? balls : 0}:${dx}`;
     let e = built.get(k);
     if (!e) {
       const b = new Builder(), anims: Anim[] = [];
       at.build(b, an, { idx: m.idx, n, balls, color: MODS[m.id as keyof typeof MODS]?.color ?? at.color, anims });
       e = { geo: b.build(), anims };
+      if (dx) { e.geo.translate(dx, 0, 0); for (const x of anims) x.at = [x.at[0] + dx, x.at[1], x.at[2]]; }
       built.set(k, e);
     }
     if (!e.geo.attributes.position.count) continue;

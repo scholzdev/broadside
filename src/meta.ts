@@ -5,6 +5,7 @@ import { t, tr } from './i18n';
 import { RELICS, RELIC_IDS, CREW, CREW_IDS } from './relics';
 import { SEAS, SEA_COUNT, BOSS_IDS, BossId } from './seas';
 import { HEAT_MAX, HEAT_DBL, END } from './heatdefs';
+import { DAILY } from './daily';
 const KEY = 'broadside.meta';
 export const UNLOCK_ALL = new URLSearchParams(location.search).has('unlockall'); // in memory only: nothing is saved while set
 
@@ -22,12 +23,17 @@ export interface Stats {
   seaBest: number[]; seaWins: number[];
   /** v10 Heat per sea: bestHeat = highest heat cleared + 1 (0 = never won; heat N+1 is unlocked once N is cleared); heatWins = wins on heat 1+; endBest = best endless step. */
   bestHeat: number[]; heatWins: number[]; endBest: number[];
+  /** v11 records: total play time (s), evolved modules over all runs, highest run level, fastest win per sea (s, 0 = none), runs/wins per ship and per captain id. */
+  playTime: number; evolutions: number; maxLevel: number; fastestWin: number[];
+  shipRuns: Record<string, number>; shipWins: Record<string, number>; capRuns: Record<string, number>; capWins: Record<string, number>;
 }
-const freshStats = (): Stats => ({ runs: 0, kills: 0, fullSails: 0, rerolls: 0, autoCasts: 0, burned: 0, rams: 0, boatsEaten: 0, damageTaken: 0, cratesEaten: 0, hutsEaten: 0, shopBuys: 0, deaths: 0, wins: 0, doubloonsEarned: 0, questsDone: 0, maxModLevel: {}, bossKills: {}, bestAct: 0, seaBest: SEAS.map(() => 0), seaWins: SEAS.map(() => 0), bestHeat: SEAS.map(() => 0), heatWins: SEAS.map(() => 0), endBest: SEAS.map(() => 0) });
+const freshStats = (): Stats => ({ runs: 0, kills: 0, fullSails: 0, rerolls: 0, autoCasts: 0, burned: 0, rams: 0, boatsEaten: 0, damageTaken: 0, cratesEaten: 0, hutsEaten: 0, shopBuys: 0, deaths: 0, wins: 0, doubloonsEarned: 0, questsDone: 0, maxModLevel: {}, bossKills: {}, bestAct: 0, seaBest: SEAS.map(() => 0), seaWins: SEAS.map(() => 0), bestHeat: SEAS.map(() => 0), heatWins: SEAS.map(() => 0), endBest: SEAS.map(() => 0), playTime: 0, evolutions: 0, maxLevel: 0, fastestWin: SEAS.map(() => 0), shipRuns: {}, shipWins: {}, capRuns: {}, capWins: {} });
 
 /** seasUnlocked: how many seas are open (sea k+1 opens when the act-4 boss of sea k falls). seaQuests: completed (and paid) sea quest ids. */
-export interface Save { doubloons: number; unlocked: string[]; disabled: string[]; stats: Stats; seasUnlocked: number; seaQuests: string[] }
-export const M: Save = { doubloons: 0, unlocked: [], disabled: [], stats: freshStats(), seasUnlocked: 1, seaQuests: [] };
+export interface Save { doubloons: number; unlocked: string[]; disabled: string[]; stats: Stats; seasUnlocked: number; seaQuests: string[]; /** Achievement ids already announced (achievements.ts). */ achSeen: string[] }
+export const M: Save = { doubloons: 0, unlocked: [], disabled: [], stats: freshStats(), seasUnlocked: 1, seaQuests: [], achSeen: [] };
+/** legacy: the save predates achievements, so achievements already earned are marked seen silently. */
+export const flags = { legacy: false };
 
 /** Catalog of lockable items; everything else (Galleon, Old Salt, Iron Bess, Greedy Gwen, the four starting modules) is always unlocked. */
 export interface Entry { id: string; cost: number; challenge: () => string; prog: () => [number, number] }
@@ -41,6 +47,7 @@ const lv8 = (id: string, name: string): Ch => ({ challenge: () => t('ch.lv8', { 
 const e = (id: string, cost: number, c: Ch): Entry => ({ id, cost, ...c });
 export const CATALOG: Entry[] = [
   e('ship:sloop', 300, act(2)), e('ship:frigate', 600, boss('manowar', "Man-o'-War")),
+  e('ship:brigantine', 450, act(3)), e('ship:xebec', 700, boss('firegalleon', 'Fire Galleon')),
   e('cap:rosa', 200, cnt('fullSails', 100, 'fullSails')), e('cap:tom', 200, cnt('rerolls', 15, 'rerolls')),
   e('cap:corvo', 350, cnt('kills', 500, 'sink')), e('cap:hana', 300, act(3)),
   e('cap:morwen', 400, cnt('autoCasts', 300, 'autoCasts')), e('cap:flint', 350, cnt('burned', 300, 'burn')),
@@ -66,9 +73,11 @@ for (const id of RELIC_IDS) if (!RELICS[id].starter) CATALOG.push(e('relic:' + i
 for (const id of CREW_IDS) if (CREW[id].cost) CATALOG.push(e('crew:' + id, CREW[id].cost, buyOnly));
 export const entry = (id: string): Entry | undefined => CATALOG.find(x => x.id === id);
 
-export const isUnlocked = (id: string): boolean => UNLOCK_ALL || !entry(id) || M.unlocked.includes(id);
+export const isUnlocked = (id: string): boolean => UNLOCK_ALL || DAILY || !entry(id) || M.unlocked.includes(id);
 /** A module can enter the draft / shop pool when unlocked and not toggled off (starting modules can't be toggled off). */
-export const modInPool = (id: string): boolean => isUnlocked('mod:' + id) && !M.disabled.includes(id);
+export const modInPool = (id: string): boolean => DAILY || (isUnlocked('mod:' + id) && !M.disabled.includes(id));
+/** Ship-upgrade cards (cannon, hull, ...) can be banned too; they are stored as 'up:<id>' in the same list. */
+export const upInPool = (id: string): boolean => DAILY || !M.disabled.includes('up:' + id);
 export const unlockedModCount = (): number => MOD_IDS.filter(id => isUnlocked('mod:' + id)).length;
 export const freeRollsPerRun = (): number => Math.floor(unlockedModCount() / 3);
 /** Every unlocked id including the always-unlocked starting set (for debug). */
@@ -99,11 +108,14 @@ function load(): void {
     f.seaBest = SEAS.map((_, i) => arr(st.seaBest, i)); f.seaWins = SEAS.map((_, i) => arr(st.seaWins, i));
     f.bestHeat = SEAS.map((_, i) => Math.min(HEAT_MAX + 1, Math.max(arr(st.bestHeat, i), f.seaWins[i] > 0 ? 1 : 0))); f.heatWins = SEAS.map((_, i) => arr(st.heatWins, i)); f.endBest = SEAS.map((_, i) => arr(st.endBest, i));
     if (!Array.isArray(st.seaBest)) { f.seaBest[0] = f.bestAct; f.seaWins[0] = arr(old.bossesKilled, 3); }
+    f.fastestWin = SEAS.map((_, i) => arr(st.fastestWin, i));
+    for (const k of ['shipRuns', 'shipWins', 'capRuns', 'capWins'] as const) for (const [id, v] of Object.entries(st[k] ?? {})) if (num(v)) f[k][id] = num(v);
     f.shopBuys = Math.max(f.shopBuys, num((st as { harborBuys?: unknown }).harborBuys)); // pre-shop saves counted harbor purchases
     M.stats = f;
     M.seasUnlocked = Math.max(1, Math.min(SEA_COUNT, Math.floor(num(o.seasUnlocked))), ...f.seaWins.map((w, i) => (w > 0 ? Math.min(SEA_COUNT, i + 2) : 1)));
     M.seaQuests = strs(o.seaQuests).filter(id => SEAS.some(s => s.quests.some(q => q.id === id)));
-  } catch { M.doubloons = 0; M.unlocked = []; M.disabled = []; M.stats = freshStats(); M.seasUnlocked = 1; M.seaQuests = []; }
+    M.achSeen = strs(o.achSeen); flags.legacy = !Array.isArray(o.achSeen) && f.runs > 0;
+  } catch { M.doubloons = 0; M.unlocked = []; M.disabled = []; M.stats = freshStats(); M.seasUnlocked = 1; M.seaQuests = []; M.achSeen = []; }
 }
 load();
 window.addEventListener('pagehide', save);
@@ -111,8 +123,8 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 // ---- per-run counters (reset by startRun) ----
 /** c: per-run counters for sea quests (every bump key, 'kill:<type>', 'buy:<item>', 'fastBoss', 'win'); quests: sea quests finished this run. */
-export const R = { gold: 0, bosses: 0, act: 1, kills: 0, sea: 0, heat: 0, newly: [] as string[], settled: false, c: {} as Record<string, number>, quests: [] as string[], qn: 0, qd: 0 };
-export function resetRun(sea = 0, heat = 0): void { Object.assign(R, { gold: 0, bosses: 0, act: 1, kills: 0, sea, heat, newly: [], settled: false, c: {}, quests: [], qn: 0, qd: 0 }); }
+export const R = { gold: 0, bosses: 0, act: 1, kills: 0, sea: 0, heat: 0, newly: [] as string[], settled: false, c: {} as Record<string, number>, quests: [] as string[], qn: 0, qd: 0, chestD: 0 };
+export function resetRun(sea = 0, heat = 0): void { Object.assign(R, { gold: 0, bosses: 0, act: 1, kills: 0, sea, heat, newly: [], settled: false, c: {}, quests: [], qn: 0, qd: 0, chestD: 0 }); }
 export const runCount = (k: string, n = 1): void => { R.c[k] = (R.c[k] ?? 0) + n; };
 export const seaOpen = (sea: number): boolean => UNLOCK_ALL || sea < M.seasUnlocked;
 /** Highest heat level the player may pick on this sea (0 = only the base level). */
@@ -128,6 +140,7 @@ export function unlock(id: string): void {
 }
 /** Unlocks every item whose challenge is complete. */
 export function checkUnlocks(): void {
+  if (DAILY) return; // daily runs earn doubloons but no challenge unlocks
   for (const c of CATALOG) { if (M.unlocked.includes(c.id)) continue; const [a, b] = c.prog(); if (a >= b) unlock(c.id); }
 }
 export function bump(k: NumStat, n = 1): void {
@@ -142,13 +155,15 @@ export function noteModLevel(id: string, lv: number): void {
 }
 export function noteAct(a: number): void {
   R.act = Math.max(R.act, a);
+  if (DAILY) return;
   if (a > M.stats.seaBest[R.sea]) { M.stats.seaBest[R.sea] = a; later(); }
   if (a > M.stats.bestAct) { M.stats.bestAct = a; checkUnlocks(); later(); }
 }
 /** A boss died; the act-4 boss of a sea also counts a sea win and opens the next sea. */
 export function noteBoss(id: BossId, last: boolean): void {
-  M.stats.bossKills[id] = (M.stats.bossKills[id] ?? 0) + 1; R.bosses++; runCount('boss');
-  if (last) {
+  if (!DAILY) M.stats.bossKills[id] = (M.stats.bossKills[id] ?? 0) + 1; // boss kills gate ship unlocks
+  R.bosses++; runCount('boss');
+  if (last && !DAILY) {
     M.stats.seaWins[R.sea]++;
     if (R.heat > 0) M.stats.heatWins[R.sea]++;
     M.stats.bestHeat[R.sea] = Math.max(M.stats.bestHeat[R.sea], Math.min(HEAT_MAX + 1, R.heat + 1));
@@ -158,9 +173,9 @@ export function noteBoss(id: BossId, last: boolean): void {
 }
 export function noteGold(n: number): void { R.gold += n; }
 /** Endless mode reached `step` on the current sea. */
-export function noteEndless(step: number): void { if (step > M.stats.endBest[R.sea]) { M.stats.endBest[R.sea] = step; later(); } }
+export function noteEndless(step: number): void { if (!DAILY && step > M.stats.endBest[R.sea]) { M.stats.endBest[R.sea] = step; later(); } }
 
-export interface RunResult { gold: number; bosses: number; acts: number; kills: number; goldD: number; bossD: number; actD: number; killD: number; total: number; balance: number; unlocked: string[]; quests: { id: string; reward: number }[]; questN: number; questD: number; endN: number; endD: number; heat: number; mul: number }
+export interface RunResult { gold: number; bosses: number; acts: number; kills: number; goldD: number; bossD: number; actD: number; killD: number; chestD: number; total: number; balance: number; unlocked: string[]; quests: { id: string; reward: number }[]; questN: number; questD: number; endN: number; endD: number; heat: number; mul: number }
 /** Awards the run's doubloons once (a second call returns null). */
 export function settleRun(mul = 1): RunResult | null {
   if (R.settled) return null;
@@ -170,11 +185,11 @@ export function settleRun(mul = 1): RunResult | null {
   const quests = SEAS[R.sea].quests.filter(q => R.quests.includes(q.id) && !M.seaQuests.includes(q.id)).map(q => ({ id: q.id, reward: q.reward }));
   for (const q of quests) M.seaQuests.push(q.id);
   const endD = Math.floor(END.dbl), hm = HEAT_DBL[R.heat] ?? 1;
-  const total = Math.round((goldD + bossD + actD + killD + R.qd + endD) * mul * SEAS[R.sea].dblMul * hm) + quests.reduce((a, q) => a + q.reward, 0);
+  const total = Math.round((goldD + bossD + actD + killD + R.qd + endD + R.chestD) * mul * SEAS[R.sea].dblMul * hm) + quests.reduce((a, q) => a + q.reward, 0);
   M.doubloons += total; M.stats.doubloonsEarned += total;
   checkUnlocks();
   save();
-  return { gold: R.gold, bosses: R.bosses, acts: R.act, kills: R.kills, goldD, bossD, actD, killD, total, balance: M.doubloons, unlocked: [...R.newly], quests, questN: R.qn, questD: R.qd, endN: END.on ? END.step : 0, endD, heat: R.heat, mul: SEAS[R.sea].dblMul * hm };
+  return { gold: R.gold, bosses: R.bosses, acts: R.act, kills: R.kills, goldD, bossD, actD, killD, chestD: R.chestD, total, balance: M.doubloons, unlocked: [...R.newly], quests, questN: R.qn, questD: R.qd, endN: END.on ? END.step : 0, endD, heat: R.heat, mul: SEAS[R.sea].dblMul * hm };
 }
 
 export function buyUnlock(id: string): boolean {
@@ -191,7 +206,13 @@ export function toggleMod(id: string): void {
   save();
 }
 
+export function toggleUp(id: string): void {
+  const k = 'up:' + id, i = M.disabled.indexOf(k);
+  if (i >= 0) M.disabled.splice(i, 1); else M.disabled.push(k);
+  save();
+}
+
 // debug helpers
 export function addDoubloons(n: number): void { M.doubloons = Math.max(0, M.doubloons + n); save(); }
 export function unlockAll(): void { for (const c of CATALOG) if (!M.unlocked.includes(c.id)) M.unlocked.push(c.id); save(); }
-export function resetMeta(): void { M.doubloons = 0; M.unlocked = []; M.disabled = []; M.stats = freshStats(); M.seasUnlocked = 1; M.seaQuests = []; resetRun(); save(); }
+export function resetMeta(): void { M.doubloons = 0; M.unlocked = []; M.disabled = []; M.stats = freshStats(); M.seasUnlocked = 1; M.seaQuests = []; M.achSeen = []; resetRun(); save(); }

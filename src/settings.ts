@@ -6,13 +6,15 @@ import { lang } from './i18n';
 export type Shake = 'off' | 'low' | 'normal';
 export const QUALITIES: Quality[] = ['high', 'medium', 'low'];
 export const SHAKES: Shake[] = ['off', 'low', 'normal'];
+export type Steer = 'stick' | 'tank';
+export const STEERS: Steer[] = ['stick', 'tank'];
 export const SHAKE_MUL: Record<Shake, number> = { off: 0, low: 0.5, normal: 1 };
 const KEY = 'broadside.settings';
 /** quality null = Auto (the renderer's own adaptive choice). */
-export const S = { quality: null as Quality | null, shake: 'normal' as Shake, nums: true, arcs: true, padDz: 0.2, vib: true, tutDone: false };
+export const S = { quality: null as Quality | null, shake: 'normal' as Shake, nums: true, arcs: true, padDz: 0.2, vib: true, tutDone: false, steer: 'stick' as Steer };
 
 export function saveSettings(): void {
-  try { localStorage.setItem(KEY, JSON.stringify({ quality: S.quality, shake: S.shake, nums: S.nums, arcs: S.arcs, padDz: S.padDz, vib: S.vib, tutDone: S.tutDone, muted: audio.muted, volume: audio.volume, music: audio.music, sfx: audio.sfx })); } catch { /* storage unavailable */ }
+  try { localStorage.setItem(KEY, JSON.stringify({ quality: S.quality, shake: S.shake, nums: S.nums, arcs: S.arcs, padDz: S.padDz, vib: S.vib, tutDone: S.tutDone, steer: S.steer, muted: audio.muted, volume: audio.volume, music: audio.music, sfx: audio.sfx })); } catch { /* storage unavailable */ }
 }
 function load(): void {
   try {
@@ -26,6 +28,7 @@ function load(): void {
       if (typeof o.arcs === 'boolean') S.arcs = o.arcs;
       if (typeof o.padDz === 'number' && o.padDz >= 0.05 && o.padDz <= 0.6) S.padDz = o.padDz;
       if (typeof o.vib === 'boolean') S.vib = o.vib;
+      if (STEERS.includes(o.steer as Steer)) S.steer = o.steer as Steer;
       if (typeof o.tutDone === 'boolean') S.tutDone = o.tutDone;
       // muted is not restored: the game always launches muted
       if (typeof o.volume === 'number' && o.volume >= 0 && o.volume <= 1) setVolume(o.volume);

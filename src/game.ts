@@ -9,7 +9,7 @@ import { SP } from './spelldata';
 import { stepSummons, clearSummons } from './summons';
 import { takeTaps, pad } from './input';
 import { stepShip, shipTap, initShip, model as shipModel } from './ship';
-import { L, setLoadout, saveLoadout, sanitizeExtras, startModules, Extras, ShipId, CaptainId, SHIPS, CAPTAINS } from './loadout';
+import { L, setLoadout, saveLoadout, sanitizeExtras, startModules, NO_EXTRAS, Extras, ShipId, CaptainId, SHIPS, CAPTAINS } from './loadout';
 import { secondWind } from './relicfx';
 import { killBonus, doubloonMul, resetPassives } from './capfx';
 import { absorbShield } from './spells2';
@@ -18,7 +18,8 @@ import { shopPrice, buyCard } from './loot';
 import { crewState } from './crewdefs';
 import { stepCrew, noteHit, resetCrewRuntime, crewView, addCrew, setCrewLevel } from './crew';
 import { applyCrewCard } from './crewcards';
-import { evolve, stepEvo, installEvoDebug } from './evolutions';
+import { evolve, stepEvo, installEvoDebug, isEvolved } from './evolutions';
+import { recordRun, checkAchievements } from './achievements';
 import type { CrewId } from './relics';
 import { stepEdibles, edibles, orbs } from './edibles';
 import { snap } from './spatial';
@@ -41,10 +42,13 @@ import { aim } from './aim';
 import { TUT } from './tutorialdata';
 import { tutTap, stepTutorial, stopTutorial, startTutorial, jumpTutorial } from './tutorial';
 import { HEAT, END, heatAt, resetEndless } from './heatdefs';
-import { worldHeat } from './world';
+import { worldHeat, islands } from './world';
 import { beginEndless, stepEndless } from './endless';
 import { showChoice, hideChoice } from './endlessui';
 import { resetCosmetics } from './cosmetics';
+import { DAILY, resetDailyCounters, rollKey } from './daily';
+import { dailyCfg, noteDailyAttempt, noteDailyResult } from './dailyrun';
+import type { RunResult } from './meta';
 import { bump, runCount, noteModLevel, noteAct, noteBoss, noteGold, resetRun, settleRun, checkUnlocks, freeRollsPerRun, M, addDoubloons, unlockAll, resetMeta, unlockedIds } from './meta';
 
 export type RunState = 'menu' | 'paused' | 'playing' | 'levelup' | 'loot' | 'choice' | 'dead' | 'won';
@@ -98,12 +102,14 @@ export function beginPick(): void {
 }
 /** Rolls the 3 free cards (a reroll keeps the buy row) and, when `fresh`, the 2 buyable cards (never a duplicate of a free card). */
 function rollCards(fresh = false): void {
+  rollKey(fresh, 0);
   G.cards = rollSet(cardCtx(), G.state === 'loot' && heatAt(4) ? 2 : 3, true, fresh ? undefined : new Set(G.buy.flatMap(c => (c ? [c.id] : [])))); // heat 4: loot shows 2 cards; a reroll never repeats a buy-row card
   if (!G.cards.length) { // everything maxed: nothing to offer
     G.buy = [];
     if (G.state === 'loot') setSail(); else G.state = 'playing';
     return;
   }
+  rollKey(fresh, 1);
   if (fresh) G.buy = heatAt(5) ? [] : rollSet(cardCtx(), 2, true, new Set(G.cards.map(c => c.id))); // heat 5: no buy row
   showCards();
 }
@@ -232,20 +238,26 @@ function checkDeath(): void {
   if (G.hp > 0 || G.god) return;
   if (!secondWind()) { G.hp = 0; endRun(false); }
 }
+const evolvedCount = (): number => G.modules.filter(m => isEvolved(m.id)).length;
 export function endRun(won: boolean): void {
   if (G.state === 'dead' || G.state === 'won') return;
   G.state = won ? 'won' : 'dead';
   if (!(won && END.on)) bump(won ? 'wins' : 'deaths');
-  if (won && !END.on) { runCount('win'); checkSeaQuests(); } // endless: the win was already counted when Sail On was chosen
-  showEnd(won, settleRun(doubloonMul()));
+  if (won && !END.on && !DAILY) { runCount('win'); checkSeaQuests(); } // endless: the win was already counted when Sail On was chosen
+  recordRun(G.time, G.level, evolvedCount());
+  const res = settleRun(doubloonMul());
+  noteDaily(won, res);
+  checkAchievements();
+  showEnd(won, res);
 }
 
 /** Begins a fresh run with the given loadout (also rebuilds the player model). Used by the menu, ?quick and debug.start. */
 export function startRun(ship: ShipId, captain: CaptainId, opts?: Partial<Extras>): void {
   if (TUT.active) stopTutorial();
-  const x = sanitizeExtras(ship, captain, opts);
+  if (DAILY) { const d = dailyCfg(); ship = d.ship; captain = d.captain; opts = d.extras; } // Daily Voyage: today's fixed loadout, nothing is saved
+  const x = DAILY ? { ...NO_EXTRAS, ...opts } as Extras : sanitizeExtras(ship, captain, opts);
   setLoadout(ship, captain, x);
-  saveLoadout(ship, captain, x);
+  if (DAILY) { resetDailyCounters(); noteDailyAttempt(); } else saveLoadout(ship, captain, x);
   clearEnemies(); clearEnemyProjectiles(); resetSpawner(); clearHazards(); resetPlayerStatus();
   HEAT.level = x.heat; resetEndless(); hideChoice();
   if (worldSea() !== x.sea || worldHeat() !== x.heat) applySea(x.sea);
@@ -269,11 +281,15 @@ export function startRun(ship: ShipId, captain: CaptainId, opts?: Partial<Extras
   resetQuests();
   if (x.relic === 'medal') { G.level = 2; G.state = 'levelup'; G.baseRoll = true; G.freeRoll = L.cap.freeRoll > 0; rollCards(true); } // Admiral's Medal: level 2 and one pick right away
 }
-const qs = (extra: string): string => location.pathname + '?' + [FAST ? 'fast' : '', extra].filter(Boolean).join('&');
+const qs = (extra: string): string => location.pathname + '?' + [FAST ? 'fast' : '', DAILY ? 'daily' : '', extra].filter(Boolean).join('&');
 /** Page reload keeps the saved ship and captain and skips the menu. */
 /** Leaving a run early (pause menu restart / main menu) still pays its doubloons, like sinking does. */
 function settleAbandoned(): void {
-  if (G.state === 'playing' || G.state === 'paused' || G.state === 'levelup' || G.state === 'loot' || G.state === 'choice') settleRun(doubloonMul());
+  if (G.state === 'playing' || G.state === 'paused' || G.state === 'levelup' || G.state === 'loot' || G.state === 'choice') { recordRun(G.time, G.level, evolvedCount()); noteDaily(false, settleRun(doubloonMul())); }
+}
+/** Daily Voyage: keeps the best result of today locally. */
+function noteDaily(won: boolean, res: RunResult | null): void {
+  if (DAILY) noteDailyResult({ act: G.act, kills: G.kills, time: Math.floor(G.time), won, doubloons: res?.total ?? 0 });
 }
 export const restartRun = (): void => { settleAbandoned(); location.href = qs('quick'); };
 export const toMainMenu = (): void => { settleAbandoned(); location.href = location.pathname + (FAST ? '?fast' : ''); };
@@ -366,6 +382,7 @@ export function installDebug(): void {
     get cards() { return JSON.parse(JSON.stringify(G.cards)) as unknown; },
     get buyRow() { return JSON.parse(JSON.stringify(G.buy)) as unknown; },
     get crew() { return crewView(); },
+    get dailyView() { const f = (a: { x: number; z: number }[]) => a.slice(0, 8).map(o => `${o.x.toFixed(1)},${o.z.toFixed(1)}`); return { daily: DAILY, islands: f(islands), edibles: f(edibles) }; },
     get spell() { return spellView(); },
     get aim() { return { ...aim }; },
     get pad() { return { connected: pad.connected, id: pad.id, lastInput: pad.lastInput }; },

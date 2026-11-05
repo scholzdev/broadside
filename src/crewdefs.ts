@@ -7,7 +7,7 @@ export type CrewState = Partial<Record<CrewId, CrewEntry>>;
 /** The run's crew (G.crew points at this object; startRun refills it in place so deriveStats can read it without importing the game). */
 export const crewState: CrewState = {};
 export const MAX_CREW_LV = 5;
-export const SHIP_CAP: Record<ShipId, number> = { sloop: 6, galleon: 10, frigate: 14 };
+export const SHIP_CAP: Record<ShipId, number> = { sloop: 6, brigantine: 8, galleon: 10, xebec: 12, frigate: 14 };
 /** Deck order: figure i of the ship is the i-th entry of this list expanded by count. */
 export const CREW_ORDER: CrewId[] = ['musket', 'boarder', 'carp', 'gunner', 'look', 'surgeon', 'cook', 'quart', 'navigator', 'monkey', 'mate'];
 /** Fore-aft position (0 stern .. 1 bow) of each deck slot; figure g stands on the rail (g even: port, odd: starboard). Shared by dressing and crew.ts. */

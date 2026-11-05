@@ -4,10 +4,11 @@ export const input = { zoom: 1, lock: false };
 /** Gamepad state shared with gamepad.ts / prompts.ts: lastInput drives the button-prompt swap (body.pad). */
 export const pad = { connected: false, id: '', lastInput: 'keyboard' as 'keyboard' | 'gamepad' | 'touch' };
 /** Analog stick input written by gamepad.ts each frame: turn = -1..1 (+1 = port), fwd/back = throttle, boost = RT / A held. */
-export const padIn = { turn: 0, fwd: false, back: false, boost: false };
+export const padIn = { turn: 0, fwd: false, back: false, boost: false, aimX: 0, aimY: 0, mag: 0 };
 const srcListeners: (() => void)[] = [];
 /** On-screen controls (touch.ts): same shape as padIn but never overwritten by gamepad.ts. */
-export const touchIn = { turn: 0, fwd: false, back: false, boost: false };
+/** aimX / aimY = stick deflection on screen (x right, y up), mag = 0..1 (deadzone applied); used by absolute 'stick' steering, while turn / fwd / back stay zero in that mode. */
+export const touchIn = { turn: 0, fwd: false, back: false, boost: false, aimX: 0, aimY: 0, mag: 0 };
 export const onInputSource = (f: () => void): void => { srcListeners.push(f); };
 export function setLastInput(src: 'keyboard' | 'gamepad' | 'touch'): void {
   if (pad.lastInput === src) return;
@@ -46,6 +47,10 @@ export const turnAxis = (): number => {
   const kb = (held.has('KeyA') || held.has('ArrowLeft') ? 1 : 0) - (held.has('KeyD') || held.has('ArrowRight') ? 1 : 0);
   return Math.max(-1, Math.min(1, kb + padIn.turn + touchIn.turn)); // keyboard is digital, the stick analog (deadzone applied in gamepad.ts)
 };
+/** True while any steering / throttle key is held (keyboard tank steering overrides the stick). */
+export const kbDrive = (): boolean => ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].some(k => held.has(k));
+/** The stronger of the gamepad and touch sticks (screen space: x right, y up, mag 0..1). */
+export const stickVec = (): { x: number; y: number; mag: number } => { const s = touchIn.mag > padIn.mag ? touchIn : padIn; return { x: s.aimX, y: s.aimY, mag: s.mag }; };
 /** Full Sail: hold Shift. */
 export const boostHeld = (): boolean => held.has('ShiftLeft') || held.has('ShiftRight') || padIn.boost || touchIn.boost;
 /** Debug: hold keys programmatically (released on the next call or a window blur). */
