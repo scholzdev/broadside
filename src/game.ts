@@ -271,8 +271,12 @@ export function startRun(ship: ShipId, captain: CaptainId, opts?: Partial<Extras
 }
 const qs = (extra: string): string => location.pathname + '?' + [FAST ? 'fast' : '', extra].filter(Boolean).join('&');
 /** Page reload keeps the saved ship and captain and skips the menu. */
-export const restartRun = (): void => { location.href = qs('quick'); };
-export const toMainMenu = (): void => { location.href = location.pathname + (FAST ? '?fast' : ''); };
+/** Leaving a run early (pause menu restart / main menu) still pays its doubloons, like sinking does. */
+function settleAbandoned(): void {
+  if (G.state === 'playing' || G.state === 'paused' || G.state === 'levelup' || G.state === 'loot' || G.state === 'choice') settleRun(doubloonMul());
+}
+export const restartRun = (): void => { settleAbandoned(); location.href = qs('quick'); };
+export const toMainMenu = (): void => { settleAbandoned(); location.href = location.pathname + (FAST ? '?fast' : ''); };
 export const QUICK = new URLSearchParams(location.search).has('quick');
 
 export function togglePause(): void {
