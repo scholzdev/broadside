@@ -1,0 +1,22 @@
+// v10 Decorations (cosmetics.ts / cosmeticsui.ts).
+export const EN_COSMETICS: Record<string, string> = {
+  'deco.tab': 'Decorations', 'deco.tab.lo': 'Loadout',
+  'deco.hint': 'Q / E: switch tab &middot; Up / Down: category &middot; Left / Right: pick &middot; Enter: equip / buy &middot; Esc: back to loadout',
+  'deco.slot.sail': 'Sails', 'deco.slot.hull': 'Hull paint', 'deco.slot.flag': 'Flag', 'deco.slot.fig': 'Figurehead', 'deco.slot.wake': 'Wake',
+  'deco.desc.sail': 'Colour and pattern of every sail on your ship.', 'deco.desc.hull': 'Paint scheme for hull, gun band and carvings.',
+  'deco.desc.flag': 'The colours you fly from the tallest masthead.', 'deco.desc.fig': 'A carved figure on the stem, under the bowsprit.',
+  'deco.desc.wake': 'The colour of the foam trail behind your ship while sailing.',
+  'deco.equipped': '&#10003; Equipped', 'deco.equip': 'Enter or click to equip', 'deco.free': 'Your ship\'s own look.', 'deco.earned': 'Earned by achievement!',
+  'deco.preview': 'Cosmetic only: shown on the ship here and at sea.',
+  'deco.ch.wins': 'Win {n} runs', 'deco.ch.endless': 'Reach endless step {n}',
+  'deco.sail.default': "Ship's Canvas", 'deco.sail.crimson': 'Crimson Corsair', 'deco.sail.royal': 'Royal Stripes', 'deco.sail.midnight': 'Midnight Sails',
+  'deco.sail.sunset': 'Sunset Band', 'deco.sail.jester': "Jester's Quarters", 'deco.sail.emerald': 'Emerald Trim', 'deco.sail.ghost': 'Ghostly Shroud',
+  'deco.hull.default': "Shipwright's Paint", 'deco.hull.navy': 'Navy Blue', 'deco.hull.blood': 'Blood Red', 'deco.hull.ivory': 'Ivory & Teal',
+  'deco.hull.seagreen': 'Sea Green', 'deco.hull.royal': 'Royal Purple', 'deco.hull.ebony': 'Ebony & Gold', 'deco.hull.ember': 'Ember Hull',
+  'deco.flag.default': "Ship's Colours", 'deco.flag.jolly': 'Jolly Roger', 'deco.flag.swords': 'Crossed Cutlasses', 'deco.flag.anchor': 'Anchor',
+  'deco.flag.sun': 'Golden Sun', 'deco.flag.heart': 'Sweetheart', 'deco.flag.moon': 'Moon & Stars', 'deco.flag.crown': 'Crown', 'deco.flag.kraken': 'Kraken',
+  'deco.fig.default': 'No figurehead', 'deco.fig.mermaid': 'Mermaid', 'deco.fig.eagle': 'Sea Eagle', 'deco.fig.skull': 'Grinning Skull',
+  'deco.fig.kraken': 'Kraken', 'deco.fig.dragon': 'Dragon',
+  'deco.wake.default': 'Sea Foam', 'deco.wake.gold': 'Gold Dust', 'deco.wake.ice': 'Ice Blue', 'deco.wake.emerald': 'Emerald Glow',
+  'deco.wake.violet': 'Violet Mist', 'deco.wake.ember': 'Ember Trail', 'deco.wake.rainbow': 'Rainbow Wake',
+};

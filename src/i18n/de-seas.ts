@@ -1,0 +1,23 @@
+// v8 Teil 1: Meere, Seekarte, Gefahren, Spielerzustände, Meeres-Aufträge.
+export const DE_SEAS: Record<string, string> = {
+  'sea.calm.name': 'Ruhige See', 'sea.reef.name': 'Korallenriffe', 'sea.fog.name': 'Nebelküste', 'sea.volcano.name': 'Vulkaninseln',
+  'sea.calm.flavor': 'Warme Passatwinde, Palmeninseln und eine Marine, die deinen Kopf will.',
+  'sea.reef.flavor': 'Türkise Untiefen verbergen Korallen, die jeden Rumpf aufreißen. Achte auf den Kiel.',
+  'sea.fog.flavor': 'Eine graue Küste, an der Leuchttürme blinken und Feinde aus dem Dunst auftauchen.',
+  'sea.volcano.flavor': 'Schwarzer Fels, Aschehimmel und Feuer, das vom Himmel fällt.',
+  'hz.none.name': 'Keine Gefahr', 'hz.none.text': 'Freie Fahrt.',
+  'hz.reef.name': 'Riffuntiefen', 'hz.reef.text': 'Korallenfelder: 6 Schaden/s und 30 % langsamer, solange du darüber fährst.',
+  'hz.fog.name': 'Nebel', 'hz.fog.text': 'Du siehst nur 16 m um dein Schiff. Pfeile zeigen versteckte Feinde.',
+  'hz.eruption.name': 'Ausbrüche', 'hz.eruption.text': 'Etwa alle 8 s regnet Feuer in markierte Kreise: 25 Schaden und Brand.',
+  'map.title': 'Seekarte', 'map.back': 'Zurück', 'map.go': 'Kurs setzen', 'map.locked': 'Gesperrt', 'map.lock': 'Besiege das {boss} in: {sea}',
+  'map.best': 'Bestes: Akt {n}', 'map.bestNone': 'Noch nicht befahren', 'map.cleared': 'Bezwungen', 'map.mult': 'Dublonen &times;{n}',
+  'map.hazard': 'Gefahr', 'map.enemies': 'Feinde', 'map.bosses': 'Bosse', 'map.diff': 'Schwierigkeit', 'map.hint': '&larr; &rarr; Meer wählen &middot; Enter Kurs setzen &middot; Esc zurück',
+  'map.quests': 'Meeres-Aufträge', 'map.qhint': 'In einer Fahrt, einmalige Belohnung', 'map.scale': 'Feind-LP &times;{h} &middot; Schaden &times;{d}',
+  'sq.done': 'Meeres-Auftrag erfüllt!', 'sq.pop': 'Auftrag!',
+  'sq.calm1': 'Versenke {n} Kanonenboote in einer Fahrt', 'sq.calm2': 'Fange {n} Fischerboote in einer Fahrt', 'sq.calm3': 'Erreiche Akt {n}, ohne dass dein Rumpf unter 25 % LP fällt',
+  'sq.reef1': 'Versenke {n} Schwarmkutter in einer Fahrt', 'sq.reef2': 'Plündere {n} Hütten in einer Fahrt', 'sq.reef3': 'Versenke {n} Bosse innerhalb von 60 s nach ihrem Erscheinen',
+  'sq.fog1': 'Versenke {n} Geisterschiffe in einer Fahrt', 'sq.fog2': 'Sammle {n} Kisten in einer Fahrt', 'sq.fog3': 'Bezwinge die Nebelküste in unter {m} Minuten',
+  'sq.vol1': 'Versenke {n} Brander in einer Fahrt', 'sq.vol2': 'Ramme {n}-mal Feinde in einer Fahrt', 'sq.vol3': 'Bezwinge die Vulkaninseln',
+  'end.sea': 'Meer: <b>{name}</b> &middot; Dublonen &times;{m}', 'end.quest': 'Meeres-Auftrag: {name}',
+  'st.slow': 'Verlangsamt', 'st.burn': 'Brennt', 'lo.sea': 'Meer: {name}',
+};

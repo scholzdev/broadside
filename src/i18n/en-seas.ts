@@ -1,0 +1,23 @@
+// v8 pass 1: seas, Sea Chart, hazards, player statuses, sea quests.
+export const EN_SEAS: Record<string, string> = {
+  'sea.calm.name': 'Calm Seas', 'sea.reef.name': 'Coral Reefs', 'sea.fog.name': 'Fog Coast', 'sea.volcano.name': 'Volcanic Isles',
+  'sea.calm.flavor': 'Warm trade winds, palm islands and a navy that wants your head.',
+  'sea.reef.flavor': 'Turquoise shallows hide coral that tears a hull open. Mind your keel.',
+  'sea.fog.flavor': 'A grey coast where lighthouses blink and enemies loom out of the murk.',
+  'sea.volcano.flavor': 'Black rock, ash skies and fire falling from the heavens.',
+  'hz.none.name': 'No hazard', 'hz.none.text': 'Clear sailing.',
+  'hz.reef.name': 'Reef shallows', 'hz.reef.text': 'Coral patches: 6 damage/s and 30% slower while over them.',
+  'hz.fog.name': 'Fog', 'hz.fog.text': 'You only see 16 u around your ship. Arrows mark hidden enemies.',
+  'hz.eruption.name': 'Eruptions', 'hz.eruption.text': 'Every ~8 s fire rains down in marked circles: 25 damage and burn.',
+  'map.title': 'Sea Chart', 'map.back': 'Back', 'map.go': 'Set course', 'map.locked': 'Locked', 'map.lock': 'Defeat the {boss} in {sea}',
+  'map.best': 'Best: act {n}', 'map.bestNone': 'Not sailed yet', 'map.cleared': 'Cleared', 'map.mult': 'Doubloons &times;{n}',
+  'map.hazard': 'Hazard', 'map.enemies': 'Enemies', 'map.bosses': 'Bosses', 'map.diff': 'Difficulty', 'map.hint': '&larr; &rarr; choose a sea &middot; Enter set course &middot; Esc back',
+  'map.quests': 'Sea quests', 'map.qhint': 'One run, one-time reward', 'map.scale': 'Enemy HP &times;{h} &middot; damage &times;{d}',
+  'sq.done': 'Sea quest complete!', 'sq.pop': 'Quest!',
+  'sq.calm1': 'Sink {n} gunboats in one run', 'sq.calm2': 'Eat {n} fishing boats in one run', 'sq.calm3': 'Reach act {n} without your hull dropping below 25% HP',
+  'sq.reef1': 'Sink {n} swarm cutters in one run', 'sq.reef2': 'Plunder {n} huts in one run', 'sq.reef3': 'Sink {n} bosses within 60 s of their arrival',
+  'sq.fog1': 'Sink {n} ghost ships in one run', 'sq.fog2': 'Collect {n} crates in one run', 'sq.fog3': 'Clear the Fog Coast in under {m} minutes',
+  'sq.vol1': 'Sink {n} fire ships in one run', 'sq.vol2': 'Ram enemies {n} times in one run', 'sq.vol3': 'Clear the Volcanic Isles',
+  'end.sea': 'Sea: <b>{name}</b> &middot; doubloons &times;{m}', 'end.quest': 'Sea quest: {name}',
+  'st.slow': 'Slowed', 'st.burn': 'Burning', 'lo.sea': 'Sea: {name}',
+};

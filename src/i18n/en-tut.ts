@@ -1,0 +1,20 @@
+// Tutorial and controller strings. {k} / {a} are filled with key-or-gamepad hint badges (prompts.ts kb()).
+export const EN_TUT: Record<string, string> = {
+  'tut.step': 'Step {n} / {m}', 'tut.skipKey': 'Skip', 'tut.done': 'Done!',
+  'tut.s1.t': 'Steer', 'tut.s1.b': 'Turn the ship with {k}. Sail a half circle to get the feel.',
+  'tut.s2.t': 'Full Sail', 'tut.s2.b': 'Hold {k} to burn the nitro bar and race ahead. Keep it for one second.',
+  'tut.s3.t': 'Arcs and auto-fire', 'tut.s3.b': 'Your cannons fire on their own into the glowing side arcs. Sail alongside the two gunboats and sink them.',
+  'tut.s4.t': 'Eat fishing boats', 'tut.s4.b': 'Ram the little fishing boats to eat them for XP and gold. Eat three.',
+  'tut.s5.t': 'Captain spell', 'tut.s5.b': 'Aim with {a}, then cast your captain spell with {k}. Cast it once.',
+  'tut.s6.t': 'Level up', 'tut.s6.b': 'Pick a free card with {k}. Under the cards is the buy row: spend gold on extra upgrades. {r} rerolls the cards.',
+  'tut.s7.t': 'The act boss', 'tut.s7.b': 'The boss of this act is here early. Sink it to move on to the next act.',
+  'tut.end.t': 'Tutorial complete', 'tut.end.b': 'Fair winds, captain! The sea is yours.', 'tut.end.btn': 'To the harbour',
+  'tut.skip.t': 'Skip tutorial?', 'tut.skip.b': 'You can replay it any time in Settings.', 'tut.skip.yes': 'Skip', 'tut.skip.no': 'Keep playing',
+  'set.g.pad': 'Controller', 'set.padNone': 'No controller detected. Press a button.', 'set.padName': 'Detected: {v}',
+  'set.padDz': 'Stick deadzone', 'set.padVib': 'Vibration: {v}', 'set.tut': 'Play tutorial',
+  'controlsPad': '<b>Left stick</b> steer / throttle &middot; <b>RT</b> / <b>A</b> boost &middot; <b>Right stick</b> aim &middot; <b>RB</b> / <b>X</b> captain spell &middot; <b>Start</b> pause',
+  'card.hintPad': 'D-pad: choose &middot; A: take / buy &middot; Y: reroll',
+  'set.hintPad': 'D-pad / stick: select &middot; Left / Right: change &middot; A: confirm &middot; B: back',
+  'pad.nav': 'Navigate', 'pad.select': 'Select', 'pad.back': 'Back', 'pad.tabs': 'Tabs', 'pad.pick': 'Take / buy', 'pad.reroll': 'Reroll',
+  'pad.sail': 'Sail', 'pad.boost': 'Boost', 'pad.aim': 'Aim', 'pad.cast': 'Spell', 'pad.pause': 'Pause', 'pad.again': 'Sail again', 'pad.menu': 'Menu',
+};

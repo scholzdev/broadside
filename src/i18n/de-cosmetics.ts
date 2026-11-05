@@ -1,0 +1,22 @@
+// v10 Verzierungen (cosmetics.ts / cosmeticsui.ts).
+export const DE_COSMETICS: Record<string, string> = {
+  'deco.tab': 'Verzierungen', 'deco.tab.lo': 'Ausrüstung',
+  'deco.hint': 'Q / E: Reiter wechseln &middot; Hoch / Runter: Kategorie &middot; Links / Rechts: wählen &middot; Enter: anlegen / kaufen &middot; Esc: zurück zur Ausrüstung',
+  'deco.slot.sail': 'Segel', 'deco.slot.hull': 'Rumpffarbe', 'deco.slot.flag': 'Flagge', 'deco.slot.fig': 'Galionsfigur', 'deco.slot.wake': 'Kielwasser',
+  'deco.desc.sail': 'Farbe und Muster aller Segel deines Schiffs.', 'deco.desc.hull': 'Anstrich für Rumpf, Geschützband und Schnitzereien.',
+  'deco.desc.flag': 'Die Farben, die du am höchsten Mast zeigst.', 'deco.desc.fig': 'Eine geschnitzte Figur am Vordersteven, unter dem Bugspriet.',
+  'deco.desc.wake': 'Die Farbe der Schaumspur hinter deinem Schiff.',
+  'deco.equipped': '&#10003; Angelegt', 'deco.equip': 'Enter oder Klick zum Anlegen', 'deco.free': 'Das eigene Aussehen deines Schiffs.', 'deco.earned': 'Durch Erfolg verdient!',
+  'deco.preview': 'Rein kosmetisch: hier und auf See am Schiff zu sehen.',
+  'deco.ch.wins': 'Gewinne {n} Fahrten', 'deco.ch.endless': 'Erreiche Endlos-Stufe {n}',
+  'deco.sail.default': 'Schiffsleinwand', 'deco.sail.crimson': 'Karmesin-Korsar', 'deco.sail.royal': 'Königsstreifen', 'deco.sail.midnight': 'Mitternachtssegel',
+  'deco.sail.sunset': 'Abendrotband', 'deco.sail.jester': 'Narrenkaro', 'deco.sail.emerald': 'Smaragdsaum', 'deco.sail.ghost': 'Geisterschleier',
+  'deco.hull.default': 'Werftanstrich', 'deco.hull.navy': 'Marineblau', 'deco.hull.blood': 'Blutrot', 'deco.hull.ivory': 'Elfenbein & Türkis',
+  'deco.hull.seagreen': 'Seegrün', 'deco.hull.royal': 'Königspurpur', 'deco.hull.ebony': 'Ebenholz & Gold', 'deco.hull.ember': 'Glutrumpf',
+  'deco.flag.default': 'Schiffsfarben', 'deco.flag.jolly': 'Jolly Roger', 'deco.flag.swords': 'Gekreuzte Säbel', 'deco.flag.anchor': 'Anker',
+  'deco.flag.sun': 'Goldene Sonne', 'deco.flag.heart': 'Liebste', 'deco.flag.moon': 'Mond & Sterne', 'deco.flag.crown': 'Krone', 'deco.flag.kraken': 'Krake',
+  'deco.fig.default': 'Keine Galionsfigur', 'deco.fig.mermaid': 'Meerjungfrau', 'deco.fig.eagle': 'Seeadler', 'deco.fig.skull': 'Grinsender Schädel',
+  'deco.fig.kraken': 'Krake', 'deco.fig.dragon': 'Drache',
+  'deco.wake.default': 'Meerschaum', 'deco.wake.gold': 'Goldstaub', 'deco.wake.ice': 'Eisblau', 'deco.wake.emerald': 'Smaragdglanz',
+  'deco.wake.violet': 'Violetter Dunst', 'deco.wake.ember': 'Glutspur', 'deco.wake.rainbow': 'Regenbogen-Kielwasser',
+};
