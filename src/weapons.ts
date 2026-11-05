@@ -21,6 +21,8 @@ import { play } from './audio';
 import { L } from './loadout';
 import { SP, autoK } from './spelldata';
 import { evoFired } from './evolutions';
+import { leadShot, leadLob } from './lead';
+import { crewShotMul } from './crew';
 
 type Kind = ProjKind;
 export interface Proj {
@@ -103,7 +105,7 @@ export function deleteEnemyProjectiles(x: number, z: number, r: number, max = In
   return n;
 }
 
-export interface Volley { x: number; z: number; heading: number; side: number; n: number; aim: number; len: number; speed: number; dmg: number; range: number; friendly: boolean; pierce?: number; chain?: number }
+export interface Volley { x: number; z: number; heading: number; side: number; n: number; aim: number; len: number; speed: number; dmg: number; range: number; friendly: boolean; pierce?: number; chain?: number; tx?: number; tz?: number }
 /** n balls spread along the hull, fired from the port (+1) or starboard (-1) flank. */
 export function fireVolley(v: Volley): void {
   const fx = Math.sin(v.heading), fz = Math.cos(v.heading);
@@ -111,8 +113,9 @@ export function fireVolley(v: Volley): void {
     const off = v.n === 1 ? 0 : (i / (v.n - 1) - 0.5) * v.len;
     const lat = v.friendly ? v.side * L.geo.flank : v.side;
     const x = v.x + fx * off + fz * lat, z = v.z + fz * off - fx * lat;
-    fireBall(x, z, v.aim + (Math.random() - 0.5) * 0.06, v.speed, v.dmg, v.range, v.friendly, v.pierce ?? 0).chain = v.chain;
-    muzzle(x + Math.sin(v.aim) * 0.6, 0.9, z + Math.cos(v.aim) * 0.6, v.aim);
+    const aim = v.tx === undefined || v.tz === undefined ? v.aim : Math.atan2(v.tx - x, v.tz - z); // with a target point every gun is trained on it
+    fireBall(x, z, aim + (Math.random() - 0.5) * 0.06, v.speed, v.dmg, v.range, v.friendly, v.pierce ?? 0).chain = v.chain;
+    muzzle(x + Math.sin(aim) * 0.6, 0.9, z + Math.cos(aim) * 0.6, aim);
   }
   if (v.friendly) { addTrauma(0.1); addRecoil(v.side); play('boom'); }
   else if (Math.hypot(v.x - G.player.x, v.z - G.player.z) < 30) play('boom');
@@ -155,7 +158,7 @@ const lastT: Record<string, { e: Enemy; t: number }> = {};
 export function shotDmg(m: Owned): number {
   const k = (G.buffs.vanish ? G.modStats.lantern?.ability.mult ?? 1 : 1) * (SP.dead > 0 ? 2 : 1); // Vanish and Dead Eye
   G.buffs.vanish = false;
-  return (G.modStats[m.id]?.auto.dmg ?? 0) * G.st.autoDmgMul * k * (m.slot === 'side' ? L.cap.sideDmg : 1) * critMul(m); // Harpoon Hal: side modules weaker; Spyglass Battery: crit for the others
+  return (G.modStats[m.id]?.auto.dmg ?? 0) * G.st.autoDmgMul * k * crewShotMul() * (m.slot === 'side' ? L.cap.sideDmg : 1) * critMul(m); // Harpoon Hal: side modules weaker; Spyglass Battery: crit for the others
 }
 
 function fireWeapon(m: Owned, arc: ArcId, t: Enemy): void {
@@ -166,20 +169,21 @@ function fireWeapon(m: Owned, arc: ArcId, t: Enemy): void {
   const aim = Math.atan2(t.x - p.x, t.z - p.z);
   if (fireNew(m, arc, t, a, dmg, rng, pierce)) return;
   if (m.id === 'broadside') {
-    fireVolley({ x: p.x, z: p.z, heading: p.heading, side: arc === 'port' ? 1 : -1, n: G.st.balls + a.count, aim, len: L.geo.volley, speed: a.speed, dmg, range: rng, friendly: true, pierce });
+    const side = arc === 'port' ? 1 : -1, lat = side * L.geo.flank, lx = p.x + fz0 * lat, lz = p.z - fx0 * lat, q = leadShot(lx, lz, t, a.speed);
+    fireVolley({ x: p.x, z: p.z, heading: p.heading, side, n: G.st.balls + a.count, aim: Math.atan2(q.x - lx, q.z - lz), tx: q.x, tz: q.z, len: L.geo.volley, speed: a.speed, dmg, range: rng, friendly: true, pierce });
   } else if (m.id === 'chaser') {
-    const n = 1 + a.count;
-    for (let i = 0; i < n; i++) fireBall(p.x + fx0 * L.geo.chaserAt, p.z + fz0 * L.geo.chaserAt, aim + (i - (n - 1) / 2) * 2 * a.fan * Math.PI / 180, a.speed, dmg, rng, true, pierce).slow = L.cap.bowSlow;
+    const n = 1 + a.count, cx = p.x + fx0 * L.geo.chaserAt, cz = p.z + fz0 * L.geo.chaserAt, q = leadShot(cx, cz, t, a.speed), la = Math.atan2(q.x - cx, q.z - cz);
+    for (let i = 0; i < n; i++) fireBall(cx, cz, la + (i - (n - 1) / 2) * 2 * a.fan * Math.PI / 180, a.speed, dmg, rng, true, pierce).slow = L.cap.bowSlow;
     muzzle(p.x + fx0 * L.geo.chaserMuzzle, 0.9, p.z + fz0 * L.geo.chaserMuzzle, aim);
     play('boom');
   } else if (m.id === 'mortar') {
-    const d = Math.hypot(t.x - p.x, t.z - p.z);
+    const q = leadLob(p.x, p.z, t, d => Math.max(a.minFlight, d / a.speed)), tx = q.x, tz = q.z, d = Math.hypot(tx - p.x, tz - p.z);
     for (let i = 0; i <= a.count; i++) {
       const sa = Math.random() * Math.PI * 2, sd = i ? Math.sqrt(Math.random()) * a.scatter : 0;
-      lobShell(p.x, p.z, t.x + Math.cos(sa) * sd, t.z + Math.sin(sa) * sd, dmg, Math.max(a.minFlight, d / a.speed), a.radius);
+      lobShell(p.x, p.z, tx + Math.cos(sa) * sd, tz + Math.sin(sa) * sd, dmg, Math.max(a.minFlight, d / a.speed), a.radius);
     }
-  } else if (m.id === 'harpoon') shootHarpoon(a, aim, dmg, rng, pierce);
-  else if (m.id === 'carronade') fireCarronade(a, arc === 'port' ? 1 : -1, aim, dmg, rng, pierce);
+  } else if (m.id === 'harpoon') { const hx = p.x + fx0 * L.geo.chaserAt, hz = p.z + fz0 * L.geo.chaserAt, q = leadShot(hx, hz, t, a.speed); shootHarpoon(a, Math.atan2(q.x - hx, q.z - hz), dmg, rng, pierce); }
+  else if (m.id === 'carronade') { const side = arc === 'port' ? 1 : -1, lat = side * L.geo.flank, cx = p.x + fz0 * lat, cz = p.z - fx0 * lat, q = leadShot(cx, cz, t, a.speed); fireCarronade(a, side, Math.atan2(q.x - cx, q.z - cz), dmg, rng, pierce); }
   else if (m.id === 'rockets') fireRocket(a, aim, dmg, rng, t);
   else if (m.id === 'net') throwNet(a, t, rng);
   else {

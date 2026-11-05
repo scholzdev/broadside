@@ -15,6 +15,7 @@ import { addTrauma, popText } from './juice';
 import { play } from './audio';
 import { lerp } from './spatial';
 import { evoFired } from './evolutions';
+import { leadShot } from './lead';
 
 // ---- timer-driven autos of Tesla Coil, Gatling Swivel (spin-up), Shark Cage and Treasure Magnet ----
 const CUSTOM3 = new Set<ModuleId>(['tesla', 'gatling', 'sharkcage', 'magnet']);
@@ -60,7 +61,7 @@ function gatlingStep(m: Owned, dt: number): void {
   const k = (spin.get(m) ?? 0) / a.spin, fx0 = Math.sin(p.heading), fz0 = Math.cos(p.heading);
   const lat = side * L.geo.flank, off = (Math.random() - 0.5) * L.geo.volley;
   const x = p.x + fx0 * off + fz0 * lat, z = p.z + fz0 * off - fx0 * lat;
-  const aim = Math.atan2(target.x - x, target.z - z) + (Math.random() - 0.5) * 2 * a.spread * Math.PI / 180;
+  const q = leadShot(x, z, target, a.speed), aim = Math.atan2(q.x - x, q.z - z) + (Math.random() - 0.5) * 2 * a.spread * Math.PI / 180;
   bullet(x, z, aim, a.speed, shotDmg(m), range, G.st.pierce + a.pierce);
   muzzle(x + Math.sin(aim) * 0.6, 1.0, z + Math.cos(aim) * 0.6, aim);
   if (Math.random() < 0.35) play('hit');

@@ -4,6 +4,7 @@ import { t } from './i18n';
 import type { CrewId } from './relics';
 import { crewState, CREW_ORDER, FX, lvK, musketDmg, isAdv, crewTotal, crewCap, MAX_CREW_LV, resetCrew, startCrew, DECK_T } from './crewdefs';
 import { spawn } from './weapons';
+import { intercept } from './lead';
 import { nearestEnemy } from './summons';
 import { damageEnemy, Enemy, targetable } from './enemies';
 import { cleansePlayer } from './pstatus';
@@ -115,7 +116,8 @@ export function stepCrew(dt: number): void {
       const tg = nearestEnemy(pos.x, pos.z, range);
       if (!tg) { a[i] = 0.25; continue; }
       a[i] = FX.musket.cd;
-      const ang = Math.atan2(tg.x - pos.x, tg.z - pos.z), s = spawn('musket', pos.x, pos.z, dmg, (range + 4) / FX.musket.speed);
+      const t = intercept(tg.x - pos.x, tg.z - pos.z, Math.sin(tg.heading) * tg.speed, Math.cos(tg.heading) * tg.speed, FX.musket.speed);
+      const ang = Math.atan2(tg.x + Math.sin(tg.heading) * tg.speed * t - pos.x, tg.z + Math.cos(tg.heading) * tg.speed * t - pos.z), s = spawn('musket', pos.x, pos.z, dmg, (range + 4) / FX.musket.speed);
       s.vx = Math.sin(ang) * FX.musket.speed; s.vz = Math.cos(ang) * FX.musket.speed; s.pierce = adv ? FX.musket.advPierce : 0; s.r = 0.4; s.src = 'crew'; s.y = s.py = pos.y;
       emit('musket', i, 'fire', { x: tg.x, z: tg.z }); // the deck figure draws the flash and smoke at its muzzle (dressing/crewanim.ts)
     }

@@ -15,7 +15,7 @@ import { play } from './audio';
 import { lerp } from './spatial';
 import { CAST2, stepSpells2, renderSpells2, clearSpells2 } from './spells2';
 import { rumSip } from './relicfx';
-import { aimPoint } from './aim';
+import { aimPoint, aim } from './aim';
 
 // ---- captain signature spells (fire on their own, see autocast.ts). Data lives in spelldata.ts; casts are below. Sim runs in stepSpells (fixed step),
 // meshes are interpolated per frame in renderSpells, particles are fire-and-forget like the module actives. ----
@@ -49,12 +49,18 @@ function stream(x: number, z: number, color: number, n: number, life = 0.5): voi
 
 // ---- lobbed projectiles (Lucky Barrel, Firebomb) ----
 function lob(kind: Lob['kind'], dist: number, color: number, r: number): void {
-  const p = G.player, { x: tx, z: tz } = aimPoint(SPELLS[L.captain].maxRange ?? dist, dist, SPELLS[L.captain].radius);
+  const p = G.player, maxR = SPELLS[L.captain].maxRange ?? dist, T = 0.8, q = aimPoint(maxR, dist, SPELLS[L.captain].radius);
+  let tx = q.x, tz = q.z;
+  if (aim.active) { // lead the target (boss) or the cluster's mean drift over the flight, still within range
+    tx += aim.vx * T; tz += aim.vz * T;
+    const d = Math.hypot(tx - p.x, tz - p.z);
+    if (d > maxR) { tx = p.x + (tx - p.x) * maxR / d; tz = p.z + (tz - p.z) * maxR / d; }
+  }
   const mesh = kind === 'barrel' ? new THREE.Mesh(projGeo.keg, projMat.keg) : new THREE.Mesh(projGeo.shell, projMat.shell);
   if (kind === 'fire') mesh.scale.setScalar(1.5); else mesh.scale.setScalar(1.8);
   mesh.castShadow = true;
   scene.add(mesh);
-  lobs.push({ kind, sx: p.x, sz: p.z, tx, tz, t: 0, T: 0.8, x: p.x, z: p.z, y: 1, px: p.x, pz: p.z, py: 1, mesh, tr: 0 });
+  lobs.push({ kind, sx: p.x, sz: p.z, tx, tz, t: 0, T, x: p.x, z: p.z, y: 1, px: p.x, pz: p.z, py: 1, mesh, tr: 0 });
   fx(tx, 0.1, tz, color, r * 1.1, r * 0.35, 0.8, 0.55, true); // landing marker shrinks as it falls
   addTrauma(0.15); play('whoosh');
 }

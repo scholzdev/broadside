@@ -14,7 +14,7 @@ export const CREW_ORDER: CrewId[] = ['musket', 'boarder', 'carp', 'gunner', 'loo
 export const DECK_T = [0.6, 0.44, 0.7, 0.36, 0.52, 0.66, 0.4, 0.56, 0.48, 0.62, 0.38, 0.58, 0.46, 0.68];
 /** Per-figure numbers, scaled by lvK(level). Caps: -30% on any crew cooldown, +50% range. */
 export const FX = {
-  musket: { range: 14, advRange: 22, cd: 2.2, dmg: 3, advMul: 2, advPierce: 1, speed: 40 }, // dmg = 3 + level (4 at Lv 1, +1 per Lv)
+  musket: { range: 14, advRange: 22, cd: 2.2, dmg: 3, advMul: 2, advPierce: 1, speed: 55 }, // dmg = 3 + level (4 at Lv 1, +1 per Lv)
   boarder: { dmg: 12, leapEvery: 4, leapR: 6 },
   carp: { hps: 0.3, idle: 3, taken: 0.08 },
   gunner: { cut: 0.03, every: 8 },

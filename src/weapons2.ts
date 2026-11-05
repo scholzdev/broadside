@@ -7,6 +7,7 @@ import { fx, muzzle, smoke } from './particles';
 import { addTrauma, addRecoil } from './juice';
 import { lerp } from './spatial';
 import { play } from './audio';
+import { leadBy } from './lead';
 
 // ---- shot spawners for the Harpoon Gun, Carronade, Rocket Rack and Net Thrower autos (stats `a` = G.modStats[id].auto) ----
 /** A line of glow motes between two points (rope, tether). */
@@ -57,9 +58,9 @@ export function throwNet(a: Num, t: Enemy, range: number): void {
   for (let i = 0; i < n; i++) {
     const sa = Math.random() * Math.PI * 2, sd = i ? 3 : 0;
     const s = spawn('net', p.x - Math.sin(p.heading) * back, p.z - Math.cos(p.heading) * back, 0, 99);
-    const d = Math.hypot(t.x - p.x, t.z - p.z), k = d > range ? range / d : 1;
-    s.tx = p.x + (t.x - p.x) * k + Math.cos(sa) * sd; s.tz = p.z + (t.z - p.z) * k + Math.sin(sa) * sd;
-    s.T = 0.55; s.rad = a.radius; s.slowT = a.slowT; s.slowMul = 1 - a.slow; s.y = s.py = 1.4;
+    const T = 0.55, q = leadBy(t, T), d = Math.hypot(q.x - p.x, q.z - p.z), k = d > range ? range / d : 1;
+    s.tx = p.x + (q.x - p.x) * k + Math.cos(sa) * sd; s.tz = p.z + (q.z - p.z) * k + Math.sin(sa) * sd;
+    s.T = T; s.rad = a.radius; s.slowT = a.slowT; s.slowMul = 1 - a.slow; s.y = s.py = 1.4;
   }
   play('whoosh');
 }

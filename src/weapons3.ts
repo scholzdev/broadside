@@ -9,6 +9,7 @@ import { addPatch } from './actives3';
 import { fx, muzzle, smoke } from './particles';
 import { addTrauma, addRecoil } from './juice';
 import { play } from './audio';
+import { leadShot, leadLob } from './lead';
 
 // ---- autos of the v10 weapon modules (Swivel Gun, Chain-Shot Cannon, Fire Arrows, Bomb Ketch Mortar, Spyglass Battery) + shot spawners shared with actives3 ----
 const D = Math.PI / 180;
@@ -58,33 +59,34 @@ export function fireNew(m: Owned, arc: ArcId, t: Enemy, a: Num, dmg: number, rng
   const p = G.player, fx0 = Math.sin(p.heading), fz0 = Math.cos(p.heading), aim = Math.atan2(t.x - p.x, t.z - p.z);
   const bx = p.x + fx0 * L.geo.chaserAt, bz = p.z + fz0 * L.geo.chaserAt;
   if (m.id === 'swivel') {
-    const n = 1 + a.count;
-    for (let i = 0; i < n; i++) bullet(bx, bz, aim + (Math.random() - 0.5) * 2 * a.spread * D, a.speed, dmg, rng, pierce);
+    const n = 1 + a.count, q = leadShot(bx, bz, t, a.speed), la = Math.atan2(q.x - bx, q.z - bz);
+    for (let i = 0; i < n; i++) bullet(bx, bz, la + (Math.random() - 0.5) * 2 * a.spread * D, a.speed, dmg, rng, pierce);
     muzzle(p.x + fx0 * L.geo.chaserMuzzle, 1.0, p.z + fz0 * L.geo.chaserMuzzle, aim);
     play('hit');
   } else if (m.id === 'chain') {
-    const side = arc === 'port' ? 1 : -1, lat = side * L.geo.flank, n = 1 + a.count;
+    const side = arc === 'port' ? 1 : -1, lat = side * L.geo.flank, n = 1 + a.count, q = leadShot(p.x + fz0 * lat, p.z - fx0 * lat, t, a.speed), la = Math.atan2(q.x - (p.x + fz0 * lat), q.z - (p.z - fx0 * lat));
     for (let i = 0; i < n; i++) {
       const off = (i - (n - 1) / 2) * 1.4, x = p.x + fx0 * off + fz0 * lat, z = p.z + fz0 * off - fx0 * lat;
-      chainShot(x, z, aim + (i - (n - 1) / 2) * 0.1, a.speed, dmg, rng, pierce, a.slowT, 1 - a.slow);
+      chainShot(x, z, la + (i - (n - 1) / 2) * 0.1, a.speed, dmg, rng, pierce, a.slowT, 1 - a.slow);
       muzzle(x + Math.sin(aim) * 0.6, 0.9, z + Math.cos(aim) * 0.6, aim);
       smoke(x + Math.sin(aim) * 1.2, 1.0, z + Math.cos(aim) * 1.2, 1.4);
     }
     addTrauma(0.1); addRecoil(side); play('boom');
   } else if (m.id === 'firearrows') {
-    const n = 1 + a.count;
-    for (let i = 0; i < n; i++) arrow(p.x, p.z, aim + (i - (n - 1) / 2) * 0.12 + (Math.random() - 0.5) * 0.05, a.speed, dmg, rng, pierce);
+    const n = 1 + a.count, q = leadShot(p.x, p.z, t, a.speed), la = Math.atan2(q.x - p.x, q.z - p.z);
+    for (let i = 0; i < n; i++) arrow(p.x, p.z, la + (i - (n - 1) / 2) * 0.12 + (Math.random() - 0.5) * 0.05, a.speed, dmg, rng, pierce);
     play('whoosh');
   } else if (m.id === 'bombketch') {
-    const d = Math.hypot(t.x - p.x, t.z - p.z), bk = L.geo.kegBack;
+    const bk = L.geo.kegBack, ox = p.x - fx0 * bk, oz = p.z - fz0 * bk, q = leadLob(ox, oz, t, d => Math.max(a.minFlight, d / a.speed)), tx = q.x, tz = q.z, d = Math.hypot(tx - ox, tz - oz);
     for (let i = 0; i <= a.count; i++) {
       const sa = Math.random() * Math.PI * 2, sd = i ? Math.sqrt(Math.random()) * a.scatter : 0;
-      lobBomb(p.x - fx0 * bk, p.z - fz0 * bk, t.x + Math.cos(sa) * sd, t.z + Math.sin(sa) * sd, dmg, Math.max(a.minFlight, d / a.speed), a.radius, a.fire);
+      lobBomb(ox, oz, tx + Math.cos(sa) * sd, tz + Math.sin(sa) * sd, dmg, Math.max(a.minFlight, d / a.speed), a.radius, a.fire);
     }
     smoke(p.x - fx0 * bk, 1.2, p.z - fz0 * bk, 1.8); play('boom');
   } else if (m.id === 'spyglass') {
     const d = Math.hypot(t.x - p.x, t.z - p.z), n = 1 + a.count, k = 1 + a.bonus * Math.min(1, d / rng);
-    for (let i = 0; i < n; i++) fireBall(bx, bz, aim + (i - (n - 1) / 2) * 0.05, a.speed, dmg * k, rng, true, pierce);
+    const q = leadShot(bx, bz, t, a.speed), la = Math.atan2(q.x - bx, q.z - bz);
+    for (let i = 0; i < n; i++) fireBall(bx, bz, la + (i - (n - 1) / 2) * 0.05, a.speed, dmg * k, rng, true, pierce);
     muzzle(p.x + fx0 * L.geo.chaserMuzzle, 1.0, p.z + fz0 * L.geo.chaserMuzzle, aim);
     play('snipe');
   } else return false;

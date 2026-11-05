@@ -20,6 +20,7 @@ import { fx, muzzle } from './particles';
 import { addTrauma, popText } from './juice';
 import { play } from './audio';
 import { lerp, lerpAngle } from './spatial';
+import { leadShot } from './lead';
 
 // ---- captains 11-20 spells (cast by themselves, see autocast.ts). Data in spelldata.ts; spells.ts dispatches casts, steps, renders and clears here. ----
 const TAU = Math.PI * 2;
@@ -174,7 +175,7 @@ function stepEscort(c: Escort, dt: number): void {
   const t = nearestEnemy(c.x, c.z, 24);
   if (!t) { c.fireT = 0.2; return; }
   c.fireT = 0.8;
-  const aim = Math.atan2(t.x - c.x, t.z - c.z);
+  const q = leadShot(c.x, c.z, t, 26), aim = Math.atan2(q.x - c.x, q.z - c.z);
   fireBall(c.x + Math.sin(aim) * 1.2, c.z + Math.cos(aim) * 1.2, aim, 26, 7, 26, true);
   muzzle(c.x + Math.sin(aim) * 1.5, 1.0, c.z + Math.cos(aim) * 1.5, aim);
 }

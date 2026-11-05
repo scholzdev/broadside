@@ -17,6 +17,7 @@ import {
 import { fx, flame, explosion } from './particles';
 import { addTrauma } from './juice';
 import { play } from './audio';
+import { leadShot, leadLob, leadBy } from './lead';
 
 // ---- v10 module evolutions: the table. `apply` runs once when the card is picked (stat changes on the module's own record);
 // `fire` runs after each auto shot of the module, `cast` after its active, `step` every tick. Names / texts: i18n evo.<id>.n / .t ----
@@ -61,7 +62,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
     apply: ms => { mul(ms.auto, 'radius', 1.3); },
     fire: c => {
       if (!c.t) return;
-      const tx = c.t.x, tz = c.t.z, d = Math.hypot(tx - sx(), tz - sz());
+      const q = leadLob(sx(), sz(), c.t, dd => Math.max(0.5, dd / c.ms.auto.speed)), tx = q.x, tz = q.z, d = Math.hypot(tx - sx(), tz - sz());
       for (let i = 0; i < 5; i++) after(Math.max(0.5, d / c.ms.auto.speed) + 0.1 + i * 0.09, () => {
         const a = (i / 5) * 6.283 + rnd(0, 1), r = rnd(2.2, 4.5);
         blast(tx + Math.cos(a) * r, tz + Math.sin(a) * r, 2.2, c.dmg * 0.7);
@@ -72,7 +73,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
     fire: c => {
       const bk = L.geo.kegBack, r = c.ms.auto.radius * 0.85;
       after(0.5, () => burnPatch(sx() - Math.sin(G.player.heading) * bk, sz() - Math.cos(G.player.heading) * bk, r, 6));
-      if (c.t) burnPatch(c.t.x, c.t.z, r * 0.8, 5, 0.6);
+      if (c.t) { const q = leadBy(c.t, 0.6); burnPatch(q.x, q.z, r * 0.8, 5, 0.6); }
     } },
   ram: { color: 0x59d98a,
     apply: ms => { add(ms.auto, 'ramMul', 0.5); mul(ms.auto, 'contactMul', 0.8); },
@@ -112,7 +113,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
       for (let i = projectiles.length - 1; i >= 0; i--) {
         const q = projectiles[i];
         if ((q.kind !== 'eball' && q.kind !== 'eshell' && q.kind !== 'skull') || Math.hypot(q.x - p.x, q.z - p.z) > c.ms.auto.range * 1.5) continue;
-        const e = nearest(q.x, q.z, 40), a = e ? Math.atan2(e.x - q.x, e.z - q.z) : Math.atan2(-q.vx, -q.vz);
+        const e = nearest(q.x, q.z, 40), lp = e ? leadShot(q.x, q.z, e, 28) : null, a = lp ? Math.atan2(lp.x - q.x, lp.z - q.z) : Math.atan2(-q.vx, -q.vz);
         fx(q.x, 1, q.z, 0xcfeeff, 0.5, 2, 0.3, 1, false, undefined, 'glow');
         fireBall(q.x, q.z, a, 28, Math.max(18, q.dmg * 1.5), 40, true, 1);
         release(q); projectiles[i] = projectiles[projectiles.length - 1]; projectiles.pop(); n++;
@@ -139,7 +140,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
     } },
   carronade: { color: 0xffa040,
     apply: ms => { mul(ms.auto, 'dmg', 1.3); mul(ms.auto, 'knock', 1.5); add(ms.auto, 'count', 1); },
-    fire: c => { if (!c.t) return; const x = c.t.x, z = c.t.z; after(0.25, () => { blast(x, z, 3.2, c.dmg); for (const e of inRange(x, z, 3.2)) ignite(e); flame(x, 1, z, 2); }); } },
+    fire: c => { if (!c.t) return; const { x, z } = { ...leadBy(c.t, 0.25) }; after(0.25, () => { blast(x, z, 3.2, c.dmg); for (const e of inRange(x, z, 3.2)) ignite(e); flame(x, 1, z, 2); }); } },
   rockets: { color: 0xff8a50,
     apply: ms => { add(ms.auto, 'count', 2); mul(ms.auto, 'radius', 1.5); },
     fire: c => {
@@ -151,7 +152,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
     } },
   net: { color: 0x5ac8ff,
     apply: ms => { mul(ms.auto, 'radius', 1.3); add(ms.auto, 'count', 1); },
-    fire: c => { if (!c.t) return; const x = c.t.x, z = c.t.z; after(0.9, () => vortex(x, z, 6, 3, 5, baseDmg('net') + 14)); },
+    fire: c => { if (!c.t) return; const { x, z } = { ...leadBy(c.t, 0.9) }; after(0.9, () => vortex(x, z, 6, 3, 5, baseDmg('net') + 14)); },
     cast: () => vortex(sx(), sz(), 10, 3.5, 6, 20) },
   crowsnest: { color: 0xff6a6a,
     apply: ms => { add(ms.auto, 'count', 1); mul(ms.auto, 'range', 1.25); },
@@ -169,7 +170,7 @@ export const EVO: Record<ModuleId, EvoDef> = {
     apply: ms => { add(ms.auto, 'count', 1); },
     fire: c => {
       if (c.n % 5) return;
-      const [bx, bz] = ahead(L.geo.chaserAt), a = c.t ? Math.atan2(c.t.x - sx(), c.t.z - sz()) : G.player.heading;
+      const [bx, bz] = ahead(L.geo.chaserAt), lp = c.t ? leadShot(bx, bz, c.t, 30) : null, a = lp ? Math.atan2(lp.x - bx, lp.z - bz) : G.player.heading;
       for (let i = 0; i < 9; i++) bullet(bx, bz, a + (i - 4) * 5.5 * D, 30, c.dmg * 1.2, 14, 1);
       addTrauma(0.1); play('boom');
     } },
@@ -177,18 +178,18 @@ export const EVO: Record<ModuleId, EvoDef> = {
     apply: ms => { add(ms.auto, 'pierce', 2); ms.auto.slow = Math.min(0.65, ms.auto.slow + 0.15); },
     fire: c => {
       if (!c.t) return;
-      const x = c.t.x, z = c.t.z;
+      const x = c.t.x, z = c.t.z; // stunned on the spot, so no lead
       stun(c.t, 0.7);
       after(0.45, () => { for (const e of inRange(x, z, 5.5)) { slow(e, 2.5, 0.5); damageEnemy(e, c.dmg * 0.7, true, 'auto'); } ring(x, z, 0xc0c8d8, 1, 5.5, 0.4); });
     } },
   firearrows: { color: 0xffb040,
     apply: ms => { add(ms.auto, 'count', 2); },
-    fire: c => { if (c.t) burnPatch(c.t.x, c.t.z, 2.4, 4, 0.5); } },
+    fire: c => { if (c.t) { const q = leadBy(c.t, 0.5); burnPatch(q.x, q.z, 2.4, 4, 0.5); } } },
   bombketch: { color: 0xff5a40,
     apply: ms => { mul(ms.auto, 'radius', 1.25); mul(ms.auto, 'fire', 1.5); },
     fire: c => {
       if (!c.t) return;
-      const x = c.t.x, z = c.t.z, r = c.ms.auto.radius * 1.2;
+      const { x, z } = { ...leadBy(c.t, 1.2) }, r = c.ms.auto.radius * 1.2;
       after(1.2, () => { explosion(x, 0.8, z, r); blast(x, z, r, c.dmg * 1.5); });
     } },
   tesla: { color: 0x9fe8ff,
